@@ -49,3 +49,14 @@ A consulting-first, evidence-led platform for constructing a versioned Australia
 Open design and implementation changes as pull requests. New source ingestion requires a source manifest, licence review, validation rules and documented transformation. New models require a model manifest, feature/output contract and deterministic parity tests. A scenario can only be called reproducible when it pins every upstream release and random stream.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). No open-source licence has been selected; do not assume redistribution rights for code or external datasets.
+
+## M0.2 — Official vehicle source acquisition
+
+Read the [source download guide](docs/data-foundation/feasibility/downloading-data.md).
+
+```sh
+python scripts/download_vehicle_sources.py --groups bitre,vic,nsw,sa,act --list
+python scripts/download_vehicle_sources.py --groups bitre,vic,nsw,sa,act --download
+```
+
+Raw data goes into ignored `data/raw/`, and acquisition manifests into `data/reports/`. The [GitHub Actions workflow](.github/workflows/acquire-vehicle-data.yml) supports remote source discovery and download; raw artifacts are disabled unless expressly opted in after rights review.
