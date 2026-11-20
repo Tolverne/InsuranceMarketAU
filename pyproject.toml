@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insurance-market-au"
+version = "0.0.1"
+description = "Australian motor market data foundation and simulator (design-stage skeleton)"
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "Proprietary / licence not yet selected" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "jsonschema>=4.22,<5"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

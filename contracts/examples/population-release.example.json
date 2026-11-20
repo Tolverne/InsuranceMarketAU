@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "release_id": "example-population-draft-not-published",
+  "status": "draft",
+  "reference_date": "2026-01-31",
+  "universe": "registered_unrestricted",
+  "dataset_schema_version": "fleet-state-v0-proposed",
+  "source_ids": [
+    "BITRE-RVA-2026-01-candidate"
+  ],
+  "source_definition": "Example release; hypothetical — no data built",
+  "geography_version": "postcode-and-state-proposed",
+  "synthesis": {
+    "method": "illustrative_raking",
+    "model_version": "example-0",
+    "population_draw_id": "draw-example-001",
+    "random_algorithm": "PCG64",
+    "random_seed": 12345,
+    "parameters_uri": null
+  },
+  "outputs": [
+    {
+      "table": "fleet_state",
+      "uri": "example://not-created/fleet-state",
+      "representation": "weighted_sample",
+      "row_count": 0,
+      "weighted_vehicle_count": 0,
+      "content_sha256": null
+    }
+  ],
+  "quality_report_uri": "example://not-created/quality-report",
+  "release_content_sha256": null,
+  "known_limitations": [
+    "This is a contract fixture and is NOT a real population release."
+  ]
+}

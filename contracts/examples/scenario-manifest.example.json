@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "scenario_id": "example-two-insurer-test",
+  "scenario_version": "0.0.1",
+  "population_release_id": "example-population-draft-not-published",
+  "enrichment_release_id": null,
+  "participant_registry_version": "example-registry-v0",
+  "scenario_assumptions_ref": "example://assumptions-not-created",
+  "model_bindings": [
+    {
+      "product_id": "competitor-brand-product-1",
+      "model_id": "illustrative-competitor-gbm",
+      "model_version": "0.0.1"
+    }
+  ],
+  "horizon": {
+    "start_date": "2027-01-01",
+    "end_date": "2029-12-31",
+    "step": "month"
+  },
+  "uncertainty": {
+    "parameter_draws": 100,
+    "outcome_runs_per_draw": 100,
+    "population_draw_policy": "fixed_release"
+  },
+  "randomness": {
+    "algorithm": "PCG64",
+    "master_seed": 23901,
+    "stream_scheme": "scenario-draw-outcome-event-v0",
+    "paired_with_scenario": null
+  },
+  "reporting_basis": "management_aud",
+  "requested_metrics": [
+    "earned_premium_aud",
+    "combined_ratio",
+    "probability_of_loss",
+    "market_share"
+  ]
+}
