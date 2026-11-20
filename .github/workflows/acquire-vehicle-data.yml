@@ -1,0 +1,62 @@
+name: Acquire Australian vehicle source data
+
+# On-demand only. No raw data committed to the public repository.
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: "Comma-separated: bitre,vic,nsw,sa,act,qld,qld_flows"
+        required: true
+        default: "bitre"
+        type: string
+      mode:
+        description: "list = discover URLs; download = fetch files and fingerprint"
+        required: true
+        default: "list"
+        type: choice
+        options: [list, download]
+      publish_raw_artifact:
+        description: "UPLOAD RAW DATA as 7-day GitHub artifact ONLY after source redistribution review"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  source-acquisition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Discover or download sources
+        env:
+          GROUPS: ${{ inputs.groups }}
+          MODE: ${{ inputs.mode }}
+        shell: bash
+        run: |
+          if [[ "$MODE" == "download" ]]; then
+            python scripts/download_vehicle_sources.py --groups "$GROUPS" --download --report data/reports/acquisition.json
+          else
+            python scripts/download_vehicle_sources.py --groups "$GROUPS" --list --report data/reports/acquisition.json
+          fi
+      - name: Always preserve acquisition manifest (no source bytes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-acquisition-manifest-${{ github.run_id }}
+          path: data/reports/acquisition.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Optional temporary RAW archive — licence review required
+        if: ${{ always() && inputs.publish_raw_artifact && inputs.mode == 'download' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vehicle-raw-ephemeral-${{ github.run_id }}
+          path: data/raw/
+          if-no-files-found: warn
+          retention-days: 7

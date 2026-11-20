@@ -1,0 +1,78 @@
+name: Check official source download access
+
+# One-time/PR smoke probe against small public source resources. Raw source
+# bytes are not uploaded or committed; JSON proof-of-download only.
+on:
+  pull_request:
+    paths:
+      - "scripts/download_vehicle_sources.py"
+      - "catalog/acquisition/**"
+      - ".github/workflows/source-download-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download BITRE summary workbook only
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --static-only --groups bitre --only bitre_summary --download --report data/reports/bitre-smoke.json
+      - name: Download Victoria small model CSV only
+        if: always()
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --static-only --groups vic --only vic_model --download --report data/reports/vic-model-smoke.json
+      - name: Discover BITRE, SA and Queensland dynamic catalogue resources
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre,sa,qld_flows --list --report data/reports/ckan-smoke.json
+      - name: Download 17 BITRE detailed projections plus explanatory notes
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_2026_details --download --timeout 45 --report data/reports/bitre-details-smoke.json
+      - name: Test clearly labelled SA original-file mirror fallback
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --groups sa_mirror --download --report data/reports/sa-mirror-smoke.json
+      - name: Print safe source audit summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for p in sorted(Path("data/reports").glob("*smoke.json")):
+              report = json.loads(p.read_text())
+              print(f"SOURCE AUDIT: {p.name}, found={report['discovered']}, downloaded={report['downloaded_count']}, unresolved={report['unresolved_count']}")
+              for row in report["resources"]:
+                  if row.get("status") == "downloaded":
+                      print(f"  OK {row['id']}: {row['bytes']} bytes, sha256={row['sha256']}, {row['path']}")
+                      if "inspection" in row:
+                          print(f"    profile={row['inspection']}")
+                  else:
+                      print(f"  LISTED {row['id']}")
+              for error in report.get("discovery_errors", []):
+                  print(f"  UNRESOLVED {error['dataset']}: {error['error']}")
+          PY
+      - name: Preserve only audit manifests (not raw source bytes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vehicle-source-smoke-manifests
+          path: data/reports/*smoke.json
+          if-no-files-found: warn
+          retention-days: 7

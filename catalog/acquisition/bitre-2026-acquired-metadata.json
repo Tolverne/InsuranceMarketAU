@@ -1,0 +1,199 @@
+{
+  "inventory_schema_version": "0.1.0",
+  "source": "BITRE Road Vehicles Australia January 2026",
+  "observation_date": "2026-01-31",
+  "publisher_dataset": "https://data.gov.au/data/dataset/060ca7bb-83b0-4c9f-a58d-d7d1e7ec6083",
+  "verified_run": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44838097557",
+  "observed_at_utc": "2026-11-20T23:37:45Z",
+  "status": "downloaded_on_temporary_GitHub_runner_raw_not_retained_in_git",
+  "number_of_csvs": 17,
+  "number_of_notes_files": 1,
+  "total_bytes": 650677239,
+  "source_rights_status": "publisher_license_review_not_completed",
+  "validation_limitations": [
+    "Checksums and basic header sniffing are verified, but record counts, confidentialisation, accounting, licensing and national totals are not yet validated.",
+    "Each source is an aggregate projection. Do not join as if row-level vehicle records."
+  ],
+  "resources": [
+    {
+      "projection_id": "B26-01",
+      "resource_id": "8f7a9a86-130e-4d97-8a91-1bef302c27c9",
+      "bytes": 298897,
+      "sha256": "457a35fb826605af393119fd65ee9b7af4e4ffcbc973298d97f7a4b8c48ef0ae",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-8f7a9a86-130e-4d97-8a91-1bef302c27c9--457a35fb8266.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=8f7a9a86-130e-4d97-8a91-1bef302c27c9",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-02",
+      "resource_id": "16b61938-22e8-4c85-b067-c3ecd63ca05f",
+      "bytes": 327995,
+      "sha256": "88954e9870ee191adf72fb236ed5a4294a3634eb032e8d2c5bc9ffa4d9b752a2",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-16b61938-22e8-4c85-b067-c3ecd63ca05f--88954e9870ee.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=16b61938-22e8-4c85-b067-c3ecd63ca05f",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-03",
+      "resource_id": "be196cd3-7196-4da8-b18a-13e7576fb9ee",
+      "bytes": 20589,
+      "sha256": "ebd87de63d968ba485b4f59bc310055de47ff35da980d6318998787f0302c214",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-be196cd3-7196-4da8-b18a-13e7576fb9ee--ebd87de63d96.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=be196cd3-7196-4da8-b18a-13e7576fb9ee",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-04",
+      "resource_id": "222106ae-9eae-4ad4-a777-749e0be84aef",
+      "bytes": 1470947,
+      "sha256": "10f0c42cb6f9086c9adfc03c1d5d94d97fe2d9b97fbe752eec278be52ad6cc90",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-222106ae-9eae-4ad4-a777-749e0be84aef--10f0c42cb6f9.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=222106ae-9eae-4ad4-a777-749e0be84aef",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-05",
+      "resource_id": "7e12cd3c-e82d-4c0d-a5cd-de24f6f23970",
+      "bytes": 521544,
+      "sha256": "d8ab58c3ad487448a96750940bf4ecbe466dc019b1a5df484df6b755da19016f",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-7e12cd3c-e82d-4c0d-a5cd-de24f6f23970--d8ab58c3ad48.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=7e12cd3c-e82d-4c0d-a5cd-de24f6f23970",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-06",
+      "resource_id": "8a4584c2-28b9-431d-a592-b7e7b00883aa",
+      "bytes": 3663291,
+      "sha256": "28e4bebdc44198275809a1759033e29f34858211ebdb27496dfd563f008bff89",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-8a4584c2-28b9-431d-a592-b7e7b00883aa--28e4bebdc441.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=8a4584c2-28b9-431d-a592-b7e7b00883aa",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-07",
+      "resource_id": "143603fc-2cc3-4f82-8094-5c32b1c7062c",
+      "bytes": 3962789,
+      "sha256": "fb1f9199171379b5488d766fc8fae64c2d05655b1a816c9096bcd7111357716b",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-143603fc-2cc3-4f82-8094-5c32b1c7062c--fb1f91991713.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=143603fc-2cc3-4f82-8094-5c32b1c7062c",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-08",
+      "resource_id": "692a7f4d-dc2b-41fb-8e97-1b3a82386b1a",
+      "bytes": 30325822,
+      "sha256": "d6130e1c86ce377d83b4bec2098e53a1a3590ed54740d8a28ccb6d6447492bda",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-692a7f4d-dc2b-41fb-8e97-1b3a82386b1a--d6130e1c86ce.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=692a7f4d-dc2b-41fb-8e97-1b3a82386b1a",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-09",
+      "resource_id": "cb14ca8c-2db0-4637-93a4-76efa24e0035",
+      "bytes": 3113894,
+      "sha256": "99ddee89540b8ee72b3c7d93f62119a255e86118bceddf0148c949b72b33b81d",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-cb14ca8c-2db0-4637-93a4-76efa24e0035--99ddee89540b.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=cb14ca8c-2db0-4637-93a4-76efa24e0035",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-10",
+      "resource_id": "b29bd94e-2789-455b-a0f3-7a06ca397be5",
+      "bytes": 2969849,
+      "sha256": "182be155b6cd3f31330fb2bd5d254d71b49f104b2795d9b834e7755023ee89fa",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-b29bd94e-2789-455b-a0f3-7a06ca397be5--182be155b6cd.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=b29bd94e-2789-455b-a0f3-7a06ca397be5",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-11",
+      "resource_id": "de2a322d-7217-46dd-a215-f46cb69f4104",
+      "bytes": 88232102,
+      "sha256": "5a2967644965ac29ebf79223ce87127f9975886a7e3115571506f13e75b8e0b0",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-de2a322d-7217-46dd-a215-f46cb69f4104--5a2967644965.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=de2a322d-7217-46dd-a215-f46cb69f4104",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-12",
+      "resource_id": "ac4035c5-9471-4080-8326-968838341ad1",
+      "bytes": 88521899,
+      "sha256": "44e4a7a78786f17fa0467933a7e4f8b8269bf50097da3e08ae83f0d162cd4476",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-ac4035c5-9471-4080-8326-968838341ad1--44e4a7a78786.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=ac4035c5-9471-4080-8326-968838341ad1",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-13",
+      "resource_id": "7ec456c9-5262-4400-9707-a0d7e9bcfcec",
+      "bytes": 101533845,
+      "sha256": "ed30a5b017e147a05a7e4e9ed91eff829be5b0814701144369058934f42c104d",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-7ec456c9-5262-4400-9707-a0d7e9bcfcec--ed30a5b017e1.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=7ec456c9-5262-4400-9707-a0d7e9bcfcec",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-14",
+      "resource_id": "3ab701dd-5539-400d-9424-9fa0d25e1760",
+      "bytes": 5590954,
+      "sha256": "d82e75697a7435d3c2ea5d1e3d37ea5a615016b7a67225eb417c339e16699f30",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-3ab701dd-5539-400d-9424-9fa0d25e1760--d82e75697a74.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=3ab701dd-5539-400d-9424-9fa0d25e1760",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-15",
+      "resource_id": "fe9f2b88-7d5d-490f-b932-db990bb45397",
+      "bytes": 15186193,
+      "sha256": "c5cb4d74ba226b9a9275e9c37813e272393e77058e46ebbc21596310c3406f0c",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-fe9f2b88-7d5d-490f-b932-db990bb45397--c5cb4d74ba22.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=fe9f2b88-7d5d-490f-b932-db990bb45397",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-16",
+      "resource_id": "afa99125-baa8-49a6-8d12-ca4a47d6dac4",
+      "bytes": 166938621,
+      "sha256": "15fa83430c7ffdcb88e708a7bce4160e0db9489a27e67da7dacabd30a1c2486a",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-afa99125-baa8-49a6-8d12-ca4a47d6dac4--15fa83430c7f.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=afa99125-baa8-49a6-8d12-ca4a47d6dac4",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-17",
+      "resource_id": "f6fe4a4c-3af5-400b-bb05-047614e0ce65",
+      "bytes": 137992288,
+      "sha256": "603a3cb85dc1d34323968ce7c410d3b43361eadde86d279602d5d9d8ed960ce6",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-f6fe4a4c-3af5-400b-bb05-047614e0ce65--603a3cb85dc1.csv",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=f6fe4a4c-3af5-400b-bb05-047614e0ce65",
+      "format": "CSV",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    },
+    {
+      "projection_id": "B26-EXPL",
+      "resource_id": "d03f7dd0-d75d-4132-bd3d-c5f13d47b2b8",
+      "bytes": 5720,
+      "sha256": "396a5525fa00950c0ffbf7b60c7aff37f9dacb8d426139c472e6347a98222a8c",
+      "local_path": "data/raw/bitre/2026-01-31/bitre-2026-details-d03f7dd0-d75d-4132-bd3d-c5f13d47b2b8--396a5525fa00.txt",
+      "url_to_resolve": "https://data.gov.au/data/api/3/action/resource_show?id=d03f7dd0-d75d-4132-bd3d-c5f13d47b2b8",
+      "format": "TXT",
+      "verified_by": "GitHub Actions byte download and SHA-256; inspection headers only"
+    }
+  ]
+}
