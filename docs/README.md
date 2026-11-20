@@ -3,6 +3,7 @@
 - [Project vision and boundaries](vision/product-and-scope.md)
 - [System architecture](architecture/system-architecture.md)
 - [Architecture decisions](architecture/decisions/README.md)
+- [M0.1 data-source feasibility research](data-foundation/feasibility/README.md)
 - [Data foundation specification](data-foundation/specification.md)
 - [Canonical data model](data-foundation/canonical-data-model.md)
 - [Data provenance and quality](data-foundation/provenance-and-quality.md)

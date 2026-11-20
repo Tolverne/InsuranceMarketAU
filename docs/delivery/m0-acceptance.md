@@ -36,3 +36,16 @@
 4. Population method: full simulated vehicle rows + optional weighted sample and ensemble releases.
 5. Minimum quality threshold and escalation when published state totals disagree with national controls.
 6. First user-facing workflow: market exploration vs API/CLI queries; defer final UI choice.
+
+## M0.1 research checkpoint — 21 November 2026
+
+- [x] Initial nationwide primary-source discovery covering Australia and all eight jurisdictions.
+- [x] Identified 17 BITRE January 2026 cross-tab projections plus explanatory notes; catalogued observed dimension combinations.
+- [x] Compiled source-date, stock/flow, geographical-role, confidentialisation and legal-access risks.
+- [x] Added read-only local CSV/ZIP/XLSX file inspection script and deterministic artificial-data tests.
+- [ ] **Acquire and parse real source files:** BITRE XLSX/cross-tab CSV, VIC CSV, SA CSV, NSW ZIP, and relevant others. Portal access was restricted in research runtime; do not upgrade evidence status without actual files.
+- [ ] Confirm commercial derivative-use and data-retention terms per source; catalogue licence labels are not formal approval.
+- [ ] Inspect detailed BITRE confidentiality rules and set feasible hard/soft control weights.
+- [ ] Publish source-level schema profiles, reconciled totals, and a small end-to-end M1 fixture pipeline.
+
+See [M0.1 findings](../data-foundation/feasibility/M0.1-report.md).

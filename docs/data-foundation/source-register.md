@@ -1,5 +1,7 @@
 # Australian motor market source register — candidate/landing-page verification
 
+> **M0.1 UPDATE (2026-11-21):** The national BITRE 2026 data.gov.au dataset has **17 detailed confidentialised projections**, and NSW/SA/ACT and jurisdictional control sources are more developed than this initial seed register. See [M0.1 feasibility report](feasibility/M0.1-report.md) and [BITRE extract inventory](feasibility/bitre-2026-extract-inventory.md) for the current detailed evidence assessment. This older register remains as historical M0 discovery context.
+
 **Reviewed:** 2026-11-21. **Status:** *discovery only*. These URLs and landing-page claims have been checked; raw downloads, exact schemas, licensing for downstream commercial derivatives and completeness have **not** been fully assessed. The source manifest registry in `catalog/sources/` will track each acquired release separately.
 
 ## Initially confirmed primary publishers
