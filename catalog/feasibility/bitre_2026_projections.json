@@ -1,0 +1,250 @@
+{
+  "inventory_version": "0.1.0",
+  "publisher": "BITRE",
+  "resource_set": "Road vehicles Australia, January 2026",
+  "reference_date": "2026-01-31",
+  "source_dataset_url": "https://data.gov.au/data/dataset/060ca7bb-83b0-4c9f-a58d-d7d1e7ec6083",
+  "corroborating_catalogue_url": "https://researchdata.edu.au/road-vehicles-australia-january-2026/4251449",
+  "inspection_status": "catalogue_titles_only_no_source_files_parsed",
+  "confidentiality": "confidentialised_exact_mechanism_unknown",
+  "licence": "CC BY 3.0 Australia (catalogue only; rights not yet approved)",
+  "observations": [
+    {
+      "projection_id": "B26-01",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "manufacture_year"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-02",
+      "dimensions": [
+        "vehicle_type",
+        "motive_power",
+        "manufacture_year"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-03",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "motive_power"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-04",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-05",
+      "dimensions": [
+        "vehicle_type",
+        "motive_power",
+        "make_model"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-06",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode",
+        "motive_power"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-07",
+      "dimensions": [
+        "vehicle_type",
+        "manufacture_year",
+        "make_model"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-08",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode",
+        "manufacture_year"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-09",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "garaging_postcode",
+        "motive_power"
+      ],
+      "postcode_role": "garaging",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-10",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "motive_power",
+        "manufacture_year"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-11",
+      "dimensions": [
+        "vehicle_type",
+        "registered_postcode",
+        "make_model"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-12",
+      "dimensions": [
+        "vehicle_type",
+        "garaging_postcode",
+        "make_model"
+      ],
+      "postcode_role": "garaging",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-13",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode",
+        "make_model"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-14",
+      "dimensions": [
+        "vehicle_type",
+        "manufacture_year",
+        "motive_power",
+        "make_model"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-15",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "manufacture_year",
+        "make_model"
+      ],
+      "postcode_role": null,
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-16",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode",
+        "manufacture_year",
+        "make"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    },
+    {
+      "projection_id": "B26-17",
+      "dimensions": [
+        "vehicle_type",
+        "registered_state",
+        "registered_postcode",
+        "motive_power",
+        "make_model"
+      ],
+      "postcode_role": "registered",
+      "observation_type": "registered_vehicle_stock_count",
+      "count_handling": "unknown_pending_explanatory_notes",
+      "resource_url": null,
+      "downloaded": false
+    }
+  ],
+  "extra_resource": {
+    "id": "B26-EXPL",
+    "type": "explanatory_notes",
+    "downloaded": false
+  }
+}
