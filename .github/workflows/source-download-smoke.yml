@@ -31,6 +31,31 @@ jobs:
         shell: bash
         run: |
           python scripts/download_vehicle_sources.py --static-only --groups vic --only vic_model --download --report data/reports/vic-model-smoke.json
+      - name: Discover BITRE, SA and Queensland dynamic catalogue resources
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre,sa,qld_flows --list --report data/reports/ckan-smoke.json
+      - name: Print safe source audit summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for p in sorted(Path("data/reports").glob("*smoke.json")):
+              report = json.loads(p.read_text())
+              print(f"SOURCE AUDIT: {p.name}, found={report['discovered']}, downloaded={report['downloaded_count']}, unresolved={report['unresolved_count']}")
+              for row in report["resources"]:
+                  if row.get("status") == "downloaded":
+                      print(f"  OK {row['id']}: {row['bytes']} bytes, sha256={row['sha256']}, {row['path']}")
+                      if "inspection" in row:
+                          print(f"    profile={row['inspection']}")
+                  else:
+                      print(f"  LISTED {row['id']}")
+              for error in report.get("discovery_errors", []):
+                  print(f"  UNRESOLVED {error['dataset']}: {error['error']}")
+          PY
       - name: Preserve only audit manifests (not raw source bytes)
         if: always()
         uses: actions/upload-artifact@v4
