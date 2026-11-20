@@ -17,11 +17,11 @@ SPEC.loader.exec_module(mod)
 
 def test_catalogue_coverage() -> None:
     config = json.loads(mod.CATALOGUE.read_text())
-    assert len(config["static_resources"]) == 9
+    assert len(config["static_resources"]) == 10
     assert {x["group"] for x in config["ckan_datasets"]} == {
         "bitre", "sa", "qld", "qld_flows"
     }
-    assert all(mod.accepted_url(x["url"]) for x in config["static_resources"])
+    assert all(mod.accepted_url(x["url"], allow_mirror=x["group"] == "sa_mirror") for x in config["static_resources"])
 
 
 def test_ckan_endpoint_escapes_parameter() -> None:
@@ -33,6 +33,8 @@ def test_ckan_endpoint_escapes_parameter() -> None:
 def test_source_url_host_protection() -> None:
     assert mod.accepted_url("https://data.gov.au/resource.csv")
     assert mod.accepted_url("https://opendata.transport.vic.gov.au/data.csv")
+    assert mod.accepted_url("https://publicdata.au/file.csv", allow_mirror=True)
+    assert not mod.accepted_url("https://publicdata.au/file.csv")
     assert not mod.accepted_url("http://data.gov.au/file.csv")
     assert not mod.accepted_url("https://data.gov.au.example.net/resource.csv")
     assert not mod.accepted_url("https://evil.gov.au.example.com/file.csv")

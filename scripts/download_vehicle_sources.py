@@ -32,7 +32,7 @@ CATALOGUE = ROOT / "catalog/acquisition/download-sources.json"
 CHUNK = 1024 * 1024
 SAFE_FORMATS = {"csv", "tsv", "txt", "pdf", "zip", "xlsx", "xls"}
 USER_AGENT = "InsuranceMarketAU-research/0.1 (public government open-data acquisition)"
-REGISTRY_GROUPS = {"bitre", "vic", "nsw", "sa", "act", "qld", "qld_flows"}
+REGISTRY_GROUPS = {"bitre", "vic", "nsw", "sa", "sa_mirror", "act", "qld", "qld_flows"}
 
 
 def slug(value: str, limit: int = 65) -> str:
@@ -40,11 +40,11 @@ def slug(value: str, limit: int = 65) -> str:
     return clean[:limit].rstrip("-") or "resource"
 
 
-def accepted_url(url: str) -> bool:
+def accepted_url(url: str, allow_mirror: bool = False) -> bool:
     try:
         parsed = urlparse(url)
         host = (parsed.hostname or "").lower()
-        return parsed.scheme == "https" and (host.endswith(".gov.au") or host == "gov.au")
+        return parsed.scheme == "https" and (host.endswith(".gov.au") or host == "gov.au" or (allow_mirror and host == "publicdata.au"))
     except (TypeError, ValueError):
         return False
 
@@ -155,7 +155,8 @@ def file_signature_ok(path: Path, ext: str) -> None:
 def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int,
                       tries: int = 3) -> dict:
     url = resource["url"]
-    if not accepted_url(url):
+    allow_mirror = resource.get("source") == "third-party-publisher-mirror"
+    if not accepted_url(url, allow_mirror=allow_mirror):
         raise ValueError(f"Refusing URL: {url} (require official gov.au HTTPS host)")
     ext = resource["format"].lower()
     if ext not in SAFE_FORMATS:
@@ -169,7 +170,7 @@ def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int
             request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
             with urlopen(request, timeout=timeout) as response:
                 final_url = response.geturl()
-                if not accepted_url(final_url):
+                if not accepted_url(final_url, allow_mirror=allow_mirror):
                     raise ValueError(f"Redirect outside approved HTTPS government hosts: {final_url}")
                 length = response.headers.get("Content-Length")
                 if length and int(length) > max_bytes:
@@ -204,7 +205,9 @@ def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int
                 "sha256": checksum, "bytes": total, "url": url, "resolved_url": final_url,
                 "source_id": resource["id"], "group": resource["group"],
                 "reference_date": resource["reference_date"], "kind": resource["kind"],
-                "licence_status": "pending_review",
+                "licence_status": "pending_review", "resource_source": resource.get("source"),
+                "official_source_url": resource.get("official_source_url"),
+                "attribution": resource.get("attribution"),
             }
         except (HTTPError, URLError, OSError, ValueError, TimeoutError) as exc:
             last_error = exc
@@ -274,7 +277,7 @@ def acquisition(args: argparse.Namespace) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--groups", default="bitre,vic,nsw,sa,act",
-                        help="Comma-separated groups: bitre,vic,nsw,sa,act,qld,qld_flows")
+                        help="Comma-separated groups: bitre,vic,nsw,sa,sa_mirror,act,qld,qld_flows")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--list", action="store_true", help="Discover URLs, do not download")
     mode.add_argument("--download", action="store_true", help="Download full resource bytes locally")

@@ -105,6 +105,19 @@
       "kind": "stock",
       "source": "publisher",
       "licence_status": "pending_review"
+    },
+    {
+      "id": "sa_original_2026_mirror",
+      "group": "sa_mirror",
+      "reference_date": "2026-06-30",
+      "title": "South Australia registered vehicles by owner postcode 2026 (publisher-original CSV preserved by publicdata.au)",
+      "url": "https://publicdata.au/d/sa-registered-vehicles-by-postcode/v/2026-07-09/source.csv",
+      "format": "csv",
+      "kind": "stock",
+      "source": "third-party-publisher-mirror",
+      "official_source_url": "https://data.sa.gov.au/data/dataset/registered-vehicles-by-postcode",
+      "attribution": "Department for Infrastructure and Transport, Government of South Australia, Registered Vehicles by Postcode; CC BY 4.0. Mirror: publicdata.au version 2026-07-09.",
+      "licence_status": "pending_review"
     }
   ],
   "ckan_datasets": [
