@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "source_id": "BITRE-RVA-2026-01-candidate",
+  "publisher": "Bureau of Infrastructure and Transport Research Economics",
+  "dataset_title": "Road vehicles, Australia, January 2026",
+  "source_url": "https://www.bitre.gov.au/resource/roads-vehicles/road-vehicles-australia-january-2026",
+  "source_kind": "stock",
+  "grain": {
+    "unit": "vehicle_count_cell",
+    "dimensions": [
+      "state",
+      "vehicle_category"
+    ],
+    "count_field": "registered_vehicle_count"
+  },
+  "reference_period": {
+    "start_date": "2026-01-31",
+    "end_date": "2026-01-31"
+  },
+  "published_at": "2026-10-12",
+  "last_verified_at": "2026-11-21",
+  "geographic_coverage": [
+    "AU",
+    "ACT",
+    "NSW",
+    "NT",
+    "QLD",
+    "SA",
+    "TAS",
+    "VIC",
+    "WA"
+  ],
+  "exclusions": [
+    "Vehicles outside published unrestricted road-use registration definition"
+  ],
+  "licence_name": null,
+  "licence_review": "pending",
+  "status": "discovered",
+  "checksum_sha256": null,
+  "intended_use": [
+    "national_and_state_registered_stock_controls"
+  ],
+  "limitations": [
+    "Licensing and table-level data dictionary not yet reviewed; no file downloaded."
+  ],
+  "notes": "Candidate metadata only. No ingested data or validated national counts."
+}

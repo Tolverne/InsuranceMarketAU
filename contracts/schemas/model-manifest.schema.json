@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Algorithm-agnostic model manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "model_id",
+    "model_version",
+    "role",
+    "backend",
+    "artifact_ref",
+    "input_contract",
+    "output_contract",
+    "replay_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "enum": [
+        "target_market",
+        "underwriting",
+        "pricing",
+        "choice",
+        "claims",
+        "expenses",
+        "finance",
+        "strategy",
+        "other"
+      ]
+    },
+    "backend": {
+      "enum": [
+        "python",
+        "rule_table",
+        "container",
+        "http_api",
+        "other"
+      ]
+    },
+    "algorithm_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "input_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "features"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "features": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type",
+              "required"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "enum": [
+                  "string",
+                  "integer",
+                  "number",
+                  "boolean",
+                  "date",
+                  "datetime"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_policy": {
+                "enum": [
+                  "reject",
+                  "missing_indicator",
+                  "impute_pinned",
+                  "not_applicable"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "output_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "fields"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "enum": [
+                  "string",
+                  "integer",
+                  "number",
+                  "boolean",
+                  "date",
+                  "datetime"
+                ]
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "effective_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "deterministic": {
+      "type": "boolean"
+    },
+    "replay_policy": {
+      "enum": [
+        "pure_replay",
+        "snapshotted_external_responses",
+        "non_replayable_research_only"
+      ]
+    },
+    "error_policy": {
+      "enum": [
+        "fail_scenario",
+        "reject_quote",
+        "fallback_explicit"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

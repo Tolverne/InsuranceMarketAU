@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reproducible marketplace scenario manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scenario_id",
+    "scenario_version",
+    "population_release_id",
+    "participant_registry_version",
+    "model_bindings",
+    "horizon",
+    "uncertainty",
+    "randomness",
+    "reporting_basis"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "population_release_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enrichment_release_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "participant_registry_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_assumptions_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id",
+          "model_id",
+          "model_version"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_version": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "horizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_date",
+        "end_date",
+        "step"
+      ],
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "step": {
+          "enum": [
+            "month",
+            "quarter",
+            "year"
+          ]
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parameter_draws",
+        "outcome_runs_per_draw",
+        "population_draw_policy"
+      ],
+      "properties": {
+        "parameter_draws": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "outcome_runs_per_draw": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "population_draw_policy": {
+          "enum": [
+            "fixed_release",
+            "ensemble",
+            "sampled_parameters"
+          ]
+        }
+      }
+    },
+    "randomness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "master_seed",
+        "stream_scheme"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "master_seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stream_scheme": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paired_with_scenario": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "reporting_basis": {
+      "enum": [
+        "management_aud",
+        "statutory_adapter_aud"
+      ]
+    },
+    "requested_metrics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

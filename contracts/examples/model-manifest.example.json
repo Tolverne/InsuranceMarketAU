@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "model_id": "illustrative-competitor-gbm",
+  "model_version": "0.0.1",
+  "role": "pricing",
+  "backend": "python",
+  "algorithm_name": "GBM-like example (not trained)",
+  "artifact_ref": "example://not-created/model",
+  "artifact_sha256": null,
+  "input_contract": {
+    "contract_id": "quote-features-v0",
+    "features": [
+      {
+        "name": "vehicle_age_years",
+        "type": "integer",
+        "required": true,
+        "unit": "years",
+        "missing_policy": "reject"
+      },
+      {
+        "name": "garaging_postcode",
+        "type": "string",
+        "required": true,
+        "unit": null,
+        "missing_policy": "reject"
+      },
+      {
+        "name": "vehicle_value_aud",
+        "type": "number",
+        "required": false,
+        "unit": "AUD",
+        "missing_policy": "impute_pinned"
+      }
+    ]
+  },
+  "output_contract": {
+    "contract_id": "premium-offer-v0",
+    "fields": [
+      {
+        "name": "quote_status",
+        "type": "string",
+        "unit": null
+      },
+      {
+        "name": "gross_premium_aud",
+        "type": "number",
+        "unit": "AUD"
+      },
+      {
+        "name": "excess_aud",
+        "type": "number",
+        "unit": "AUD"
+      }
+    ]
+  },
+  "deterministic": true,
+  "replay_policy": "pure_replay",
+  "error_policy": "fail_scenario",
+  "notes": "Illustrative adapter contract; executable artefact has not been supplied."
+}

@@ -1,0 +1,57 @@
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+# Python / tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.ipynb_checkpoints/
+.DS_Store
+# Data files must NOT enter Git (including raw/personal/licensed data)
+data/*
+!data/README.md
+*.parquet
+*.arrow
+*.feather
+*.duckdb
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.csv.gz
+*.xlsx
+*.xls
+*.zip
+*.7z
+*.tar.gz
+# Large generated reports and model artefacts
+artifacts/
+outputs/
+models/
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.pt
+*.pth
+# Infrastructure state
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Allow deliberately synthetic small CSV fixtures
+!tests/fixtures/*.csv
+!examples/fixtures/*.csv

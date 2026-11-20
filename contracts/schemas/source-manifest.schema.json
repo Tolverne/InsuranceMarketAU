@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source release / catalogue manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "publisher",
+    "dataset_title",
+    "source_url",
+    "source_kind",
+    "grain",
+    "reference_period",
+    "licence_review",
+    "status",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "source_kind": {
+      "enum": [
+        "stock",
+        "flow",
+        "joint_aggregate",
+        "marginal",
+        "reference",
+        "survey",
+        "insurance_benchmark"
+      ]
+    },
+    "grain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "dimensions"
+      ],
+      "properties": {
+        "unit": {
+          "enum": [
+            "vehicle",
+            "vehicle_count_cell",
+            "event",
+            "event_count_cell",
+            "household",
+            "person",
+            "financial_aggregate",
+            "reference_record"
+          ]
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "count_field": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "reference_period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_date",
+        "end_date"
+      ],
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "published_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "geographic_coverage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "licence_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "licence_review": {
+      "enum": [
+        "pending",
+        "verified",
+        "restricted",
+        "rejected"
+      ]
+    },
+    "status": {
+      "enum": [
+        "discovered",
+        "approved",
+        "ingested",
+        "quarantined"
+      ]
+    },
+    "checksum_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "intended_use": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ingested"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "checksum_sha256"
+        ],
+        "properties": {
+          "checksum_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  ]
+}
