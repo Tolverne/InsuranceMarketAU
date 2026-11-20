@@ -24,3 +24,10 @@ The South Australian CKAN dataset call was temporarily unavailable (**HTTP 504**
 The XLSX worksheet list and CSV header are **format-only** observations. We have not yet verified all row counts, category codes, actual file quality, privacy constraints, source alignment, or the legality of redistributing complete raw files through public GitHub.
 
 For full acquisition commands, see [download guide](downloading-data.md).
+
+
+## Full 17-table BITRE download validated
+
+A subsequent [GitHub Actions full-source run](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44838097557) downloaded **all 17 detailed CSVs and the explanatory-notes TXT** (18 source objects) with **zero failed downloads**. Combined file size: **650,677,239 bytes (650.7 MB decimal)**. The full list of resource UUIDs, hashes, per-file byte sizes and deterministic local names is in [bitre-2026-acquired-metadata.json](../../../catalog/acquisition/bitre-2026-acquired-metadata.json). These are **actual downloaded file fingerprints** generated on GitHub's temporary runner. The dataset bytes themselves were not committed or retained in Git. A later user-triggered workflow or local script can reproduce the downloads and verify checksums.
+
+This is still not a reconciled national fleet. The next engineering gate is parsing BITRE's explanatory notes, auditing confidentialisation, validating the 17 projection totals against the workbook and estimating any required synthetic joint distribution.
