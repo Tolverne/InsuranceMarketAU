@@ -1,0 +1,171 @@
+{
+  "catalog_version": "1.0.0",
+  "research_date": "2026-11-21",
+  "notes": [
+    "Official-source endpoints are included as discovered, not guaranteed downloadable in all network environments.",
+    "Data rights, redistribution and per-resource licence must be reviewed before publication.",
+    "Raw files should remain outside public Git; script stores immutable content-hashed local copies."
+  ],
+  "static_resources": [
+    {
+      "id": "bitre_summary",
+      "group": "bitre",
+      "reference_date": "2026-01-31",
+      "title": "Road vehicles Australia January 2026 summary workbook",
+      "url": "https://www.bitre.gov.au/sites/default/files/documents/bitre-road-vehicles-australia-january-2026.xlsx",
+      "format": "xlsx",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "vic_postcode_q3_2026",
+      "group": "vic",
+      "reference_date": "2026-09-30",
+      "title": "Victoria Whole Fleet by Postcode Q3 2026",
+      "url": "https://opendata.transport.vic.gov.au/dataset/54e52c3b-6016-4166-a241-c253e26b8f62/resource/fb041326-4af4-4797-abef-de9cb6347bae/download/whole_fleet_vehicle_registration_snapshot_by_postcode_q3_2026.csv",
+      "format": "csv",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "vic_model_q3_2026",
+      "group": "vic",
+      "reference_date": "2026-09-30",
+      "title": "Victoria Whole Fleet by Model Q3 2026",
+      "url": "https://opendata.transport.vic.gov.au/dataset/3e1a73a2-5cc3-4e22-92bc-e80442efb009/resource/c1e343ed-7ce7-48ee-a7b8-fc3df23014d5/download/whole_fleet_vehicle_registration_snapshot_by_model_q3_2026.csv",
+      "format": "csv",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "nsw_registrations_2026",
+      "group": "nsw",
+      "reference_date": "2026",
+      "title": "TfNSW Vehicle Registrations Snapshot 2026",
+      "url": "https://opendata.transport.nsw.gov.au/data/dataset/2342b8e4-d4fc-4549-82de-b36380ea46f2/resource/ce42b24e-ffb9-4f6c-9637-6a26f9574624/download/tfnsw_vehicle_registrations_snapshot_2026.zip",
+      "format": "zip",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "nsw_age_2026",
+      "group": "nsw",
+      "reference_date": "2026",
+      "title": "TfNSW Age of Registered Vehicles Snapshot 2026",
+      "url": "https://opendata.transport.nsw.gov.au/data/dataset/2342b8e4-d4fc-4549-82de-b36380ea46f2/resource/64715b2a-0079-4eda-a618-a36ef72105c7/download/tfnsw_age_of_registered_vehicles_snapshot_2026.zip",
+      "format": "zip",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "nsw_usage_2026",
+      "group": "nsw",
+      "reference_date": "2026",
+      "title": "TfNSW Registered Vehicles by Usage Snapshot 2026",
+      "url": "https://opendata.transport.nsw.gov.au/data/dataset/2342b8e4-d4fc-4549-82de-b36380ea46f2/resource/4ed7fe09-15f1-476e-97e2-02afff9d0781/download/tfnsw_registered_vehicles_by_usage_snapshot_2026.zip",
+      "format": "zip",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "nsw_heavy_2026",
+      "group": "nsw",
+      "reference_date": "2026",
+      "title": "TfNSW Registered Heavy Vehicles by Configuration Snapshot 2026",
+      "url": "https://opendata.transport.nsw.gov.au/data/dataset/2342b8e4-d4fc-4549-82de-b36380ea46f2/resource/15ae0f12-ba3f-4189-9f67-87421141b47b/download/tfnsw_registered_heavy_vehicles_by_configuration_snapshot_2026.zip",
+      "format": "zip",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "nsw_transactions_2026",
+      "group": "nsw",
+      "reference_date": "2026",
+      "title": "TfNSW Vehicle Registration Transactions 2026",
+      "url": "https://opendata.transport.nsw.gov.au/data/dataset/2342b8e4-d4fc-4549-82de-b36380ea46f2/resource/7b921fc0-1d59-4452-9ac0-2998fee02abf/download/tfnsw_vehicle_registration_transactions_2026.zip",
+      "format": "zip",
+      "kind": "flow",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    },
+    {
+      "id": "act_make_model_suburb",
+      "group": "act",
+      "reference_date": "2026",
+      "title": "ACT registered vehicles by make model and suburb",
+      "url": "https://www.data.act.gov.au/api/views/h4vn-y97q/rows.csv?accessType=DOWNLOAD",
+      "format": "csv",
+      "kind": "stock",
+      "source": "publisher",
+      "licence_status": "pending_review"
+    }
+  ],
+  "ckan_datasets": [
+    {
+      "group": "bitre",
+      "id": "bitre_2026_details",
+      "api_base": "https://data.gov.au/data/api/3/action",
+      "dataset": "060ca7bb-83b0-4c9f-a58d-d7d1e7ec6083",
+      "filter_year": "2026",
+      "kind": "stock",
+      "reference_date": "2026-01-31",
+      "accepted_formats": [
+        "CSV",
+        "TXT",
+        "PDF",
+        "XLSX",
+        "XLS"
+      ],
+      "max_resources": 50
+    },
+    {
+      "group": "sa",
+      "id": "sa_registered_postcode_2026",
+      "api_base": "https://data.sa.gov.au/data/api/3/action",
+      "dataset": "7be2f98a-e042-4990-8513-7e176fa1ccc3",
+      "filter_year": "2026",
+      "kind": "stock",
+      "reference_date": "2026-06-30",
+      "accepted_formats": [
+        "CSV",
+        "XLS",
+        "XLSX",
+        "ZIP"
+      ],
+      "max_resources": 20
+    },
+    {
+      "group": "qld",
+      "id": "qld_registration_2022",
+      "api_base": "https://www.data.qld.gov.au/api/3/action",
+      "dataset": "vehicle-registrations",
+      "filter_year": null,
+      "kind": "stock",
+      "reference_date": "2022-10-10",
+      "accepted_formats": [
+        "CSV"
+      ],
+      "max_resources": 50
+    },
+    {
+      "group": "qld_flows",
+      "id": "qld_new_transferred_2026",
+      "api_base": "https://www.data.qld.gov.au/api/3/action",
+      "dataset": "vehicle-registration-new-and-transfers-test",
+      "filter_year": "2026",
+      "kind": "flow",
+      "reference_date": "2026",
+      "accepted_formats": [
+        "CSV"
+      ],
+      "max_resources": 30
+    }
+  ]
+}
