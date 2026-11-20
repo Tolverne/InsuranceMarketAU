@@ -1,0 +1,41 @@
+name: Check official source download access
+
+# One-time/PR smoke probe against small public source resources. Raw source
+# bytes are not uploaded or committed; JSON proof-of-download only.
+on:
+  pull_request:
+    paths:
+      - "scripts/download_vehicle_sources.py"
+      - "catalog/acquisition/**"
+      - ".github/workflows/source-download-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download BITRE summary workbook only
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --static-only --groups bitre --only bitre_summary --download --report data/reports/bitre-smoke.json
+      - name: Download Victoria small model CSV only
+        if: always()
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --static-only --groups vic --only vic_model --download --report data/reports/vic-model-smoke.json
+      - name: Preserve only audit manifests (not raw source bytes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vehicle-source-smoke-manifests
+          path: data/reports/*smoke.json
+          if-no-files-found: warn
+          retention-days: 7
