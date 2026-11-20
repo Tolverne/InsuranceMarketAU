@@ -6,21 +6,21 @@ import pytest
 from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
-KINDS = ("source", "population-release", "model", "scenario")
+KINDS = ("source-manifest", "population-release", "model-manifest", "scenario-manifest")
 
 
 @pytest.mark.parametrize("kind", KINDS)
 def test_manifest_examples_conform(kind: str) -> None:
-    schema = json.loads((ROOT / "contracts/schemas" / f"{kind}-manifest.schema.json").read_text())
-    example = json.loads((ROOT / "contracts/examples" / f"{kind}-manifest.example.json").read_text())
+    schema = json.loads((ROOT / "contracts/schemas" / f"{kind}.schema.json").read_text())
+    example = json.loads((ROOT / "contracts/examples" / f"{kind}.example.json").read_text())
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema, format_checker=FormatChecker()).validate(example)
 
 
 @pytest.mark.parametrize("kind", KINDS)
 def test_required_version_cannot_be_omitted(kind: str) -> None:
-    schema = json.loads((ROOT / "contracts/schemas" / f"{kind}-manifest.schema.json").read_text())
-    example = json.loads((ROOT / "contracts/examples" / f"{kind}-manifest.example.json").read_text())
+    schema = json.loads((ROOT / "contracts/schemas" / f"{kind}.schema.json").read_text())
+    example = json.loads((ROOT / "contracts/examples" / f"{kind}.example.json").read_text())
     example.pop("schema_version")
     assert not Draft202012Validator(schema).is_valid(example)
 

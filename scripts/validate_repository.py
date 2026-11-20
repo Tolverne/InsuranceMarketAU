@@ -13,13 +13,13 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT / "contracts"
-KINDS = ("source", "population-release", "model", "scenario")
+KINDS = ("source-manifest", "population-release", "model-manifest", "scenario-manifest")
 
 
 def validate_contracts() -> None:
     for kind in KINDS:
-        schema_file = CONTRACTS / "schemas" / f"{kind}-manifest.schema.json"
-        example_file = CONTRACTS / "examples" / f"{kind}-manifest.example.json"
+        schema_file = CONTRACTS / "schemas" / f"{kind}.schema.json"
+        example_file = CONTRACTS / "examples" / f"{kind}.example.json"
         schema = json.loads(schema_file.read_text(encoding="utf-8"))
         example = json.loads(example_file.read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(schema)
