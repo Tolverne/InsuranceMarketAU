@@ -1,0 +1,64 @@
+{
+  "record_version": "0.1.0",
+  "smoke_run": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44837619616",
+  "observed_at_utc": "2026-11-20T23:33:30Z",
+  "scope": "Publisher bytes downloaded by GitHub Actions runner; raw bytes not committed or retained in repository",
+  "resources": [
+    {
+      "id": "bitre_summary",
+      "source": "BITRE",
+      "observation_date": "2026-01-31",
+      "url": "https://www.bitre.gov.au/sites/default/files/documents/bitre-road-vehicles-australia-january-2026.xlsx",
+      "bytes": 158564,
+      "sha256": "e35996e412c58cdfd8ecf30d686bb852e4efd56b5cfbb9521af9b7cbda307e81",
+      "format": "xlsx",
+      "validation": "downloaded and zip-based xlsx metadata parsed",
+      "worksheets": [
+        "Index",
+        "Table 1",
+        "Table 2",
+        "Table 3",
+        "Table 4",
+        "Table 5",
+        "Table 6",
+        "Table 7",
+        "Table 8",
+        "Table 9",
+        "Table 10",
+        "Table 11",
+        "Table 12",
+        "Table 13",
+        "Table 14",
+        "Table 15",
+        "Explanatory Notes"
+      ]
+    },
+    {
+      "id": "vic_model_q3_2026",
+      "source": "VIC DTP",
+      "observation_date": "2026-09-30",
+      "url": "https://opendata.transport.vic.gov.au/dataset/3e1a73a2-5cc3-4e22-92bc-e80442efb009/resource/c1e343ed-7ce7-48ee-a7b8-fc3df23014d5/download/whole_fleet_vehicle_registration_snapshot_by_model_q3_2026.csv",
+      "bytes": 3488815,
+      "sha256": "1bce46ee689bc2195649d84e354d9bce18015c6d5daa88f3650dbf85c1594572",
+      "format": "csv",
+      "validation": "downloaded; header parsed as UTF-8-SIG",
+      "headers": [
+        "CD_MAKE_VEH1",
+        "CD_MODEL_VEH",
+        "CD_CLR_BDY_VEH_P",
+        "TOTAL1"
+      ]
+    }
+  ],
+  "catalogue_discovery": {
+    "bitre_detail_extracts_found": 17,
+    "bitre_explanatory_notes_found": 1,
+    "qld_2026_flows_found": 2,
+    "sa_official_ckan": "HTTP 504 gateway timeout",
+    "discovery_unresolved": 1
+  },
+  "limitations": [
+    "This profile proves byte transfer and limited file-format inspection; row totals, detailed data types and commercial derivative permissions remain unverified.",
+    "BITRE confidentialisation and VIC model aggregation must not be confused with individual vehicle records."
+  ]
+}
