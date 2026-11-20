@@ -16,7 +16,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,6 +36,11 @@ jobs:
         shell: bash
         run: |
           python scripts/download_vehicle_sources.py --groups bitre,sa,qld_flows --list --report data/reports/ckan-smoke.json
+      - name: Download 17 BITRE detailed projections plus explanatory notes
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_2026_details --download --timeout 45 --report data/reports/bitre-details-smoke.json
       - name: Test clearly labelled SA original-file mirror fallback
         continue-on-error: true
         shell: bash

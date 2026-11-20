@@ -13,11 +13,11 @@ Both resources were fetched from the government publisher URLs and passed the sc
 
 ## Successful API discovery
 
-The data.gov.au CKAN API **did return all 17 BITRE detailed 2026 files and explanatory notes** (18 resources, separate from the summary XLSX). The Queensland CKAN API returned two 2026 new-registration/transfer CSV resources. These were **listed, not downloaded** in this run.
+The data.gov.au CKAN API **did return all 17 BITRE detailed 2026 files and explanatory notes** (18 resources, separate from the summary XLSX). The Queensland CKAN API returned two 2026 new-registration/transfer CSV resources. These were **listed, not downloaded** in this initial run. The subsequent discovery check also enumerated the 2026 South Australian CSV, with zero catalogue errors.
 
 ## Blocker and fallback
 
-The official South Australian CKAN dataset call returned **HTTP 504 Gateway Timeout** in this test. A separately identifiable third-party mirror of the original government CSV has been added as an **optional** `sa_mirror` group. The mirror's own publisher record and CC BY 4.0 attribution are described at [publicdata.au](https://publicdata.au/d/sa-registered-vehicles-by-postcode/), but the source hash must be cross-checked against government original bytes before it is approved for ingestion. It must never be silently substituted for a direct official file.
+The South Australian CKAN dataset call was temporarily unavailable (**HTTP 504**) on the first smoke test, but returned the 30 June 2026 CSV in a subsequent retry. A separately identifiable third-party mirror of the original government CSV has been added as an **optional** `sa_mirror` group. The mirror's own publisher record and CC BY 4.0 attribution are described at [publicdata.au](https://publicdata.au/d/sa-registered-vehicles-by-postcode/), but the source hash must be cross-checked against government original bytes before it is approved for ingestion. On a subsequent run, the mirror's claimed publisher-original CSV downloaded successfully (30,643,325 bytes; SHA-256 `a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235`). It must never be silently substituted for a direct official file or treated as hash-matched against government bytes until those originals have been independently checked.
 
 ## What this verification does not prove
 

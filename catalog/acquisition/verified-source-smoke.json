@@ -60,5 +60,21 @@
   "limitations": [
     "This profile proves byte transfer and limited file-format inspection; row totals, detailed data types and commercial derivative permissions remain unverified.",
     "BITRE confidentialisation and VIC model aggregation must not be confused with individual vehicle records."
-  ]
+  ],
+  "followup_run": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44837963730",
+  "followup_discovery": {
+    "bitre_detailed": 17,
+    "bitre_explanatory_notes": 1,
+    "qld_2026_flow_files": 2,
+    "sa_official_2026_stock_files": 1,
+    "catalogue_errors": 0
+  },
+  "mirror_resource": {
+    "id": "sa_original_2026_mirror",
+    "source_url": "https://publicdata.au/d/sa-registered-vehicles-by-postcode/v/2026-07-09/source.csv",
+    "bytes": 30643325,
+    "sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235",
+    "status": "downloaded_from_third_party_versioned_mirror_not_hash_verified_against_official_site",
+    "attribution": "Department for Infrastructure and Transport, Government of South Australia (CC BY 4.0); publicdata.au version 2026-07-09"
+  }
 }
