@@ -31,18 +31,18 @@ A consulting-first, evidence-led platform for constructing a versioned Australia
 
 | Directory | Purpose |
 |---|---|
-| \`docs/\` | Versioned design, data methodology, ADRs and delivery plans |
-| \`contracts/\` | JSON Schemas, examples and future Arrow/Parquet contracts |
-| \`catalog/\` | Source metadata and ingestion configuration (not raw data) |
-| \`src/insurance_market_au/\` | Future Python packages for ingestion, synthesis, models, simulation and analysis |
-| \`pipelines/\` | Data acquisition, normalization, validation and release workflows |
-| \`apps/\` | Future analyst/consulting applications and APIs |
-| \`tests/\` | Contract, data-quality, stochastic, integration and performance tests |
-| \`scripts/\` | Lightweight local validation and developer utilities |
-| \`infra/\` | Future deployment definitions; provider not yet selected |
-| \`notebooks/\` | Research notebooks; never canonical processing logic |
-| \`examples/\` | Non-sensitive scenario demonstrations |
-| \`data/\` | Local-only staging location, Git-ignored |
+| `docs/` | Versioned design, data methodology, ADRs and delivery plans |
+| `contracts/` | JSON Schemas, examples and future Arrow/Parquet contracts |
+| `catalog/` | Source metadata and ingestion configuration (not raw data) |
+| `src/insurance_market_au/` | Future Python packages for ingestion, synthesis, models, simulation and analysis |
+| `pipelines/` | Data acquisition, normalization, validation and release workflows |
+| `apps/` | Future analyst/consulting applications and APIs |
+| `tests/` | Contract, data-quality, stochastic, integration and performance tests |
+| `scripts/` | Lightweight local validation and developer utilities |
+| `infra/` | Future deployment definitions; provider not yet selected |
+| `notebooks/` | Research notebooks; never canonical processing logic |
+| `examples/` | Non-sensitive scenario demonstrations |
+| `data/` | Local-only staging location, Git-ignored |
 
 ## Working agreement
 

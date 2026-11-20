@@ -7,7 +7,7 @@ This repository is documentation-led during M0. Use focused PRs with a rationale
 1. Create a descriptive feature branch; do not rewrite published data/model releases.
 2. Update documentation and contracts in the **same PR** as code changes.
 3. Record decisions with lasting architectural consequences in an ADR.
-4. Run \`python scripts/validate_repository.py\` and future test/format commands.
+4. Run `python scripts/validate_repository.py` and future test/format commands.
 5. Include a data-provenance and privacy/licence assessment for new datasets.
 6. Preserve backwards compatibility or describe explicit schema migrations.
 

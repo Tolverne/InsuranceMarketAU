@@ -4,7 +4,7 @@
 
 ## Logical layers
 
-\`\`\`mermaid
+```mermaid
 flowchart TB
     S[External source releases] --> R[Raw immutable source registry]
     R --> N[Canonical normalization & temporal harmonization]
@@ -19,7 +19,7 @@ flowchart TB
     E[Scenario manifests & experiment orchestrator] --> M
     E --> A
     A --> U[Consulting analyst UI / exports]
-\`\`\`
+```
 
 ## Bounded contexts
 
@@ -44,7 +44,7 @@ Start as a **modular Python monolith with ports/adapters**. This enables unit te
 - **Metadata/control plane:** manifests in Git initially; a transactionally managed store (possibly PostgreSQL) when concurrent scenario editing and tenant permissions emerge.
 - **Batch plane:** local development and deterministic chunked execution first; object storage and distributed workers after benchmarks justify them.
 - **User interfaces:** research notebooks or a lightweight analyst app first; a separate consulting client portal only when access and workflow requirements are clear.
-- **Cloud:** unspecified; local/open format-first, with IaC under \`infra/\` once non-functional requirements are measured.
+- **Cloud:** unspecified; local/open format-first, with IaC under `infra/` once non-functional requirements are measured.
 - **No external network required to run deterministic baseline tests.**
 
 ## Data flow and release boundaries
@@ -61,16 +61,16 @@ Start as a **modular Python monolith with ports/adapters**. This enables unit te
 
 ## Port definitions
 
-- \`SourceAdapter\`: \`discover/fetch/parse\` with source manifest.
-- \`Normalizer\`: canonicalize fields, codes, reference dates and geographical units.
-- \`PopulationSynthesizer\`: controls + assumptions + seed → population/weights + diagnostics.
-- \`FeatureProvider\`: immutable feature view/version for a requested batch.
-- \`RuleEvaluator\`: batch eligibility/reason/terms, independent of commercial price.
-- \`ModelRunner\`: batch input + context → typed output, no algorithm-specific dependency.
-- \`ChoiceModel\`: alternatives + customer context → normalized probabilities incl. outside option.
-- \`EventEngine\`: market changes and recorded transitions.
-- \`FinancialLedger\`: premiums, earned exposure, claims, expenses, reinsurance and capital.
-- \`ScenarioRunner\`: pinned dependencies + random streams → run artefacts and comparisons.
+- `SourceAdapter`: `discover/fetch/parse` with source manifest.
+- `Normalizer`: canonicalize fields, codes, reference dates and geographical units.
+- `PopulationSynthesizer`: controls + assumptions + seed → population/weights + diagnostics.
+- `FeatureProvider`: immutable feature view/version for a requested batch.
+- `RuleEvaluator`: batch eligibility/reason/terms, independent of commercial price.
+- `ModelRunner`: batch input + context → typed output, no algorithm-specific dependency.
+- `ChoiceModel`: alternatives + customer context → normalized probabilities incl. outside option.
+- `EventEngine`: market changes and recorded transitions.
+- `FinancialLedger`: premiums, earned exposure, claims, expenses, reinsurance and capital.
+- `ScenarioRunner`: pinned dependencies + random streams → run artefacts and comparisons.
 
 Implementations may run in-process, through a file-based adapter or through a service endpoint. Each port needs a contract test suite.
 

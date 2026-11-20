@@ -10,4 +10,4 @@ The public repository contains code, designs and non-sensitive metadata, **not a
 - Encrypt controlled raw datasets at rest/in transit; isolate tenants and log access when a service is deployed.
 - Source metadata is public only if publication itself is permitted. Do not encode client-specific secrets into manifests.
 
-Any future privacy impact assessment, legal/licence review or threat model should be recorded in \`docs/governance/\`.
+Any future privacy impact assessment, legal/licence review or threat model should be recorded in `docs/governance/`.

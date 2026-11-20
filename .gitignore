@@ -51,3 +51,7 @@ models/
 .terraform/
 *.tfstate
 *.tfstate.*
+
+# Allow deliberately synthetic small CSV fixtures
+!tests/fixtures/*.csv
+!examples/fixtures/*.csv
