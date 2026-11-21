@@ -54,6 +54,26 @@ jobs:
                     "headers", item["headers"])
           print("M1_REAL_TOTAL", sum(x["rows"] for x in report["profiles"]))
           PY
+      - name: Inspect published subtotal and total category semantics
+        run: |
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          for file in sorted(Path("data/processed/m1/bitre/2026-01-31").glob("*.parquet")):
+              print("M1_TOTAL_INSPECTION", file.name)
+              table=pq.read_table(file, columns=["vehicle_type","registered_state","motive_power","vehicle_count"])
+              rows=table.to_pylist()
+              for field in ("vehicle_type","registered_state","motive_power"):
+                  cats=sorted({str(r[field]) for r in rows if r[field] is not None})
+                  print("M1_CATEGORY",field,repr(cats[:100]))
+                  sums=defaultdict(int)
+                  for row in rows:
+                      if row[field] is not None:
+                          sums[row[field]]+=row["vehicle_count"] or 0
+                  print("M1_CATEGORY_TOTALS",field,repr(dict(sums))[:5500])
+          PY
       - name: Upload SAFE report only (no source or Parquet rows)
         if: always()
         uses: actions/upload-artifact@v4
