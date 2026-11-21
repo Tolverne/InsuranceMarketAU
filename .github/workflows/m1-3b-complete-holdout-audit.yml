@@ -1,0 +1,93 @@
+name: M1.3b full high-dimensional holdout source audit
+
+# This is an intentionally heavy manual follow-up after the initial evidence
+# run. Do not run automatically on every PR push.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-3b-complete-holdout-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conditional-holdout-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install source processing, model and test packages
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Test source-specific conditional and heldout evaluation invariants
+        run: python -m pytest -q tests/test_m13b_conditional.py tests/test_m13_calibration.py
+      - name: Download pinned official workbook, training and withheld projections
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python - <<'PY'
+          import json,subprocess,sys
+          from pathlib import Path
+          info=json.loads(Path('catalog/acquisition/bitre-2026-acquired-metadata.json').read_text())
+          by={r['projection_id']:r for r in info['resources'] if 'projection_id' in r}
+          required=('B26-01','B26-02','B26-03','B26-04','B26-05','B26-06',
+                    'B26-07','B26-08','B26-09','B26-10','B26-13','B26-14',
+                    'B26-15','B26-16','B26-17')
+          for pid in required:
+              print('M13B_DOWNLOAD',pid,flush=True)
+              subprocess.run([sys.executable,'scripts/download_vehicle_sources.py',
+                              '--groups','bitre','--only',by[pid]['resource_id'],
+                              '--download'],check=True)
+          PY
+      - name: Stage exact verified publisher observations and workbook benchmarks
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import extract_workbook_controls,find_workbook,write_controls
+          write_controls(extract_workbook_controls(find_workbook()),Path('data/processed/m1/controls'))
+          PY
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03,B26-04,B26-05,B26-06,B26-07,B26-08,B26-09,B26-10,B26-13,B26-14,B26-15,B26-16,B26-17 --parquet --batch-rows 20000
+      - name: Refit unchanged fourway core, sample conditional model and compare three heldouts
+        run: |
+          python scripts/m13_fit.py --iterations 32
+          python scripts/m13b_expand.py --rows 85000 --seed 42 --validate
+      - name: Print and check source-separate, thresholded 5-way/6-way holdout diagnostics
+        run: |
+          python - <<'PY'
+          import json,math
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          r=json.loads(Path('data/reports/m13b/validation.json').read_text())
+          assert r['validation_status']=='independent_heldout_source_checks_completed_not_vehicle_truth'
+          assert r['rows']==85000
+          assert abs(r['weighted_total_expected']-22771150)<.1
+          assert len(r['training_projections'])==8
+          assert set(r['training_projections']).isdisjoint(r['heldout_projections_excluded_from_sampling'])
+          metrics=r['heldout_validation']
+          assert {x['source_id'] for x in metrics}=={'B26-14','B26-16','B26-17'}
+          assert all(not x['holdout_used_for_fitting'] for x in metrics)
+          for row in metrics:
+              assert row['published_cells_above_threshold']>0,row
+              assert row['published_cells_covered_by_sample']>0,row
+              assert math.isfinite(row['absolute_percentage_error_on_thresholded_cells'])
+              print('M13B_HOLDOUT',row['source_id'],
+                    'cells',row['published_cells_above_threshold'],
+                    'covered',row['published_cells_covered_by_sample'],
+                    'WAPE',row['absolute_percentage_error_on_thresholded_cells'],
+                    'old_vehicle_WAPE',row['older_cohorts_on_thresholded_cells'])
+          s=pq.read_metadata(r['sample_file'])
+          assert s.num_rows==85000
+          print('M13B_ALL_THREE_HOLDOUTS_PASSED_SOURCE_INTEGRITY',r['rows'])
+          PY
+      - name: Preserve only aggregate report and conditional source metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m13b-full-holdout-audit-${{ github.run_id }}
+          path: |
+            data/reports/m13b/validation.json
+            data/processed/m13b/conditionals-manifest.json
+          if-no-files-found: ignore
+          retention-days: 14
