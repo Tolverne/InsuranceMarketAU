@@ -311,10 +311,14 @@ def run_m1(root: Path = ROOT, *, raw_root: Path | None = None,
     raw = raw_root or (root / "data/raw")
     profiles = []
     processed = root / "data/processed/m1/bitre/2026-01-31"
-    for resource in chosen:
+    for i, resource in enumerate(chosen, start=1):
+        print(f"[M1 {i}/{len(chosen)}] Verifying and profiling {resource['projection_id']}", flush=True)
         path = find_local_source(resource, raw, verify=verify)
         output = processed / f"{resource['projection_id'].lower()}--{resource['sha256'][:12]}.parquet" if parquet else None
         profiles.append(profile_projection(path, resource, parquet_path=output, batch_rows=batch_rows))
+        print(f"  rows={profiles[-1]['rows']:,}, detail_numeric_total={profiles[-1]['detail_numeric_total']:,}, "
+              f"published_total_rows={profiles[-1]['published_total_rows']:,}, "
+              f"unmapped={profiles[-1]['unmapped_columns']}", flush=True)
     report = {
         "pipeline": "m1.0-bitre-source-staging",
         "source_observation_date": REFERENCE_DATE,
