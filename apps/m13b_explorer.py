@@ -66,6 +66,7 @@ with st.sidebar:
     year_range = st.slider("Manufacture year", min_value=left_year,
                            max_value=right_year, value=(left_year,right_year))
     include_unknown_year = st.checkbox("Include unclassified manufacture year", value=True)
+    minimum_age = st.slider("Minimum vehicle age (years at January 2026)", 0, 100, 0)
     st.divider()
     eligible = df[
         df["registered_state"].isin(selected_states)
@@ -103,6 +104,8 @@ mask = (
 numerical_year = pd.to_numeric(df["manufacture_year"], errors="coerce")
 mask &= (numerical_year.between(*year_range)
          | (numerical_year.isna() if include_unknown_year else False))
+if minimum_age:
+    mask &= numerical_year.le(2026 - minimum_age)  # Unknown year cannot establish a minimum age.
 if selected_makes:
     mask &= df["make"].isin(selected_makes)
 if selected_models:
@@ -148,8 +151,8 @@ def chart(frame: pd.DataFrame, dimension: str, *, n: int = 20) -> None:
     st.bar_chart(series, y_label="Weighted synthetic expected vehicles")
 
 
-overview, makes_tab, geography, validation = st.tabs([
-    "Overview", "Make and model", "Registered versus garaging geography", "Validation and provenance"
+overview, makes_tab, geography, sample_rows_tab, validation = st.tabs([
+    "Overview", "Make and model", "Registered versus garaging geography", "Synthetic sample rows", "Validation and provenance"
 ])
 with overview:
     x,y = st.columns(2)
@@ -202,6 +205,18 @@ with geography:
         "Postcodes are category labels from source publications. "
         "No postcode-to-suburb translation or address/geocoder claim is made."
     )
+
+with sample_rows_tab:
+    st.subheader("Synthetic analytic sample (first 500 matching rows)")
+    st.caption(
+        "These are algorithmically simulated weighted attribute combinations, "
+        "NOT real registered vehicle records. A row weight is expected vehicles, "
+        "not a count of source records or the probability of one observed car."
+    )
+    cols = ["registered_state", "vehicle_type", "manufacture_year", "motive_power",
+            "make", "model", "registered_postcode", "garaging_postcode",
+            "expected_vehicle_weight"]
+    st.dataframe(selected[cols].head(500), hide_index=True, use_container_width=True)
 
 with validation:
     st.subheader("Model provenance and calibration")
