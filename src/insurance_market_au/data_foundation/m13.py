@@ -383,6 +383,58 @@ def evaluate_holdout(joint: Joint, holdout: dict[tuple[str, str, str, str], floa
     }
 
 
+
+def holdout_subgroup_metrics(
+    joint: Joint, holdout: dict[tuple[str, str, str, str], float]
+) -> dict:
+    """Evaluate rare/older segments separately, without fitting on any holdout.
+
+    Manufacture year must be a plain four-digit year to enter age cohorts.
+    Unparseable publication year labels are counted and left unclassified.
+    """
+    pred = {row: float(mass) for row, mass in zip(joint.tuples(), joint.weights)}
+    out: dict[str, dict] = {}
+    cohorts = {
+        "manufactured_before_1980": lambda y: y < 1980,
+        "manufactured_before_1990": lambda y: y < 1990,
+        "manufactured_before_2000": lambda y: y < 2000,
+    }
+    def summarize(rows):
+        pairs = [(float(v), pred.get(k, 0.0)) for k, v in rows]
+        published = sum(v for v, _ in pairs)
+        return {
+            "published_holdout_cells": len(pairs),
+            "published_reference_sum": published,
+            "model_expected_sum_on_published_cells": sum(p for _, p in pairs),
+            "published_cell_WAPE": (
+                sum(abs(p - v) for v, p in pairs) / published if published else None
+            ),
+            "published_cells_ge_100": sum(v >= 100 for v, _ in pairs),
+            "not_independent_vehicle_level_truth": True,
+        }
+    dated = {}
+    unparsed = 0
+    for key, v in holdout.items():
+        year = key[2]
+        if isinstance(year, str) and len(year) == 4 and year.isdecimal():
+            dated[key] = (int(year), v)
+        else:
+            unparsed += 1
+    for name, rule in cohorts.items():
+        out[name] = summarize([(key, val) for key, (year, val) in dated.items()
+                               if rule(year)])
+    by_class = {}
+    for klass in sorted({k[1] for k in holdout}):
+        by_class[klass] = summarize([(key, val) for key, val in holdout.items()
+                                    if key[1] == klass])
+    return {
+        "age_cohorts": out,
+        "vehicle_types": by_class,
+        "unclassified_manufacture_year_cells": unparsed,
+        "year_interpretation": "Plain four-digit year labels only; excludes suppressed/missing/unparseable years",
+    }
+
+
 def _safe_json(path: Path, obj: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     part = path.with_name(path.name + ".partial")
@@ -479,6 +531,7 @@ def run_m13(
     fit_report = fit(joint, constraints, iterations=iterations,
                      relaxation=relaxation, pseudocount=pseudocount)
     heldout = evaluate_holdout(joint, source_data[HOLDOUT_ID])
+    classic_diagnostics = holdout_subgroup_metrics(joint, source_data[HOLDOUT_ID])
     outputs = root / "data/processed/m13"
     distribution_path = outputs / "joint-state-type-year-fuel.parquet"
     write_joint(joint, distribution_path)
@@ -501,6 +554,7 @@ def run_m13(
         "holdout_excluded_from_training_support_fitting_and_tuning": True,
         "initial_holdout": baseline,
         "fitted_holdout": heldout,
+        "heldout_segment_diagnostics": classic_diagnostics,
         "fit": fit_report,
         "expected_joint_parquet": str(distribution_path),
         "synthetic_sample_parquet": str(sample_path) if sample_path else None,

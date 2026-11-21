@@ -8,7 +8,7 @@ import pytest
 
 from insurance_market_au.data_foundation.m13 import (
     build_support, constraints_for_joint, enforce_hard_totals, evaluate_holdout,
-    fit, margin_metrics, write_joint, write_sample,
+    fit, margin_metrics, write_joint, write_sample, holdout_subgroup_metrics,
 )
 
 
@@ -130,3 +130,20 @@ def test_unknown_source_projection_is_not_a_source_of_model_features():
     joint2=build_support(controls,before)
     assert np.array_equal(joint1.weights,joint2.weights)
     assert joint1.tuples()==joint2.tuples()
+
+
+def test_holdout_classic_age_cohorts_are_not_merged_into_accuracy_claim():
+    controls,training=example()
+    joint=build_support(controls,training)
+    fit(joint,constraints_for_joint(joint,training),iterations=5)
+    holdout={
+        ("NSW","Passenger vehicles","1990","Petrol"):12,
+        ("NSW","Passenger vehicles","2020","Electric"):18,
+        ("Vic","Motorcycles","1970","Petrol"):3,
+        ("Vic","Motorcycles","UNKNOWN","Petrol"):2,
+    }
+    result=holdout_subgroup_metrics(joint,holdout)
+    assert result["age_cohorts"]["manufactured_before_1980"]["published_reference_sum"]==3
+    assert result["age_cohorts"]["manufactured_before_2000"]["published_reference_sum"]==15
+    assert result["unclassified_manufacture_year_cells"]==1
+    assert result["vehicle_types"]["Motorcycles"]["published_reference_sum"]==5
