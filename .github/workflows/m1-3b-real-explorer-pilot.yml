@@ -3,9 +3,6 @@ name: M1.3b real-source extended synthetic explorer audit
 # Large BITRE sources (over 3m aggregates for several dimensions): this
 # initial PR check runs once, subsequent reruns are workflow_dispatch-only.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-3b-real-explorer-pilot.yml"
   workflow_dispatch:
 
 permissions:
