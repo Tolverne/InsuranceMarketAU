@@ -1,0 +1,99 @@
+name: M1.3b real-source extended synthetic explorer audit
+
+# Large BITRE sources (over 3m aggregates for several dimensions): this
+# initial PR check runs once, subsequent reruns are workflow_dispatch-only.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-3b-real-explorer-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extended-real-vehicle-joint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install source and modelling packages
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Check synthetic model invariants and source separation
+        run: python -m pytest -q tests/test_m13b_conditional.py tests/test_m13_calibration.py
+      - name: Download official publisher workbook and exact M1.3a/M1.3b training projections
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          for uuid in \
+            8f7a9a86-130e-4d97-8a91-1bef302c27c9 \
+            16b61938-22e8-4c85-b067-c3ecd63ca05f \
+            be196cd3-7196-4da8-b18a-13e7576fb9ee \
+            b29bd94e-2789-455b-a0f3-7a06ca397be5 \
+            222106ae-9eae-4ad4-a777-749e0be84aef \
+            7e12cd3c-e82d-4c0d-a5cd-de24f6f23970 \
+            8a4584c2-28b9-431d-a592-b7e7b00883aa \
+            143603fc-2cc3-4f82-8094-5c32b1c7062c; do
+              python scripts/download_vehicle_sources.py --groups bitre --only "$uuid" --download
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('catalog/acquisition/bitre-2026-acquired-metadata.json').read_text())
+          for p in a['resources']:
+              if p.get('projection_id') in ('B26-08','B26-09','B26-13','B26-15'):
+                  print('M13B_PUBLISHER_DOWNLOAD',p['projection_id'],p['resource_id'])
+          PY
+          # Remaining four model/postcode conditioning resources by pinned UUID:
+          python scripts/download_vehicle_sources.py --groups bitre --only 692a7f4d-dc2b-41fb-8e97-1b3a82386b1a --download
+          python scripts/download_vehicle_sources.py --groups bitre --only cb14ca8c-2db0-4637-93a4-76efa24e0035 --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 7ec456c9-5262-4400-9707-a0d7e9bcfcec --download
+          python scripts/download_vehicle_sources.py --groups bitre --only fe9f2b88-7d5d-490f-b932-db990bb45397 --download
+      - name: Recreate staged official source Parquet and workbook controls
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import extract_workbook_controls,find_workbook,write_controls
+          write_controls(extract_workbook_controls(find_workbook()),Path('data/processed/m1/controls'))
+          PY
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03,B26-04,B26-05,B26-06,B26-07,B26-08,B26-09,B26-10,B26-13,B26-15 --parquet
+      - name: Fit original national fourway model and expand make/model/postcode factors
+        run: |
+          python scripts/m13_fit.py --iterations 32
+          python scripts/m13b_expand.py --rows 85000 --seed 42
+      - name: Validate modelled schema, source separation and exactly retained fourway mass
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          r=json.loads(Path('data/reports/m13b/validation.json').read_text())
+          assert r['rows']==85000
+          assert len(r['training_projections'])==8
+          assert set(r['training_projections']).isdisjoint(r['heldout_projections_excluded_from_sampling'])
+          assert abs(r['weighted_total_expected']-22771150)<.1
+          assert r['exact_fourway_control_in_sample']
+          table=pq.read_table(r['sample_file'])
+          assert table.num_rows==85000
+          expected=['registered_state','vehicle_type','manufacture_year','motive_power',
+                    'make','model','registered_postcode','garaging_postcode',
+                    'expected_vehicle_weight','is_synthetic']
+          assert set(expected)<=set(table.column_names)
+          assert 'vin_prefix' not in table.column_names
+          assert 'OPEN_DATA_VEHICLE_IDENTIFIER' not in table.column_names
+          assert math.isclose(sum(table['expected_vehicle_weight'].to_pylist()),22771150,abs_tol=.1)
+          print('M13B_REAL_SAMPLE_OK',r['rows'],'source_count',len(r['training_projections']),
+                'fallback_counts',r['quality']['fallback_counts'])
+          PY
+      - name: Save source metadata only, not actual source or synthetic rows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m13b-model-metadata-${{ github.run_id }}
+          path: |
+            data/reports/m13b/validation.json
+            data/processed/m13b/conditionals-manifest.json
+          if-no-files-found: ignore
+          retention-days: 14
