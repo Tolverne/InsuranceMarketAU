@@ -251,6 +251,14 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                     if len(buffer) >= batch_rows:
                         writer.write_table(_rows_as_table(buffer, schema))
                         buffer.clear()
+            if resource.get("expected_rows") is not None and stats["rows"] != resource["expected_rows"]:
+                raise ValueError(f"{path.name}: observed rows {stats['rows']} differ from pinned release {resource['expected_rows']}")
+            if (resource.get("expected_detail_numeric_total") is not None
+                    and stats["detail_numeric_total"] != resource["expected_detail_numeric_total"]):
+                raise ValueError(f"{path.name}: detail count mismatch against pinned release")
+            if (resource.get("expected_published_total_rows") is not None
+                    and stats["published_total_rows"] != resource["expected_published_total_rows"]):
+                raise ValueError(f"{path.name}: published grand-total row count mismatch against pinned release")
             if parquet_path is not None:
                 if buffer:
                     writer.write_table(_rows_as_table(buffer, schema))
@@ -258,14 +266,6 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                 writer.close()
                 writer = None
                 os.replace(tmp_path, parquet_path)
-        if resource.get("expected_rows") is not None and stats["rows"] != resource["expected_rows"]:
-            raise ValueError(f"{path.name}: observed rows {stats['rows']} differ from pinned release {resource['expected_rows']}")
-        if (resource.get("expected_detail_numeric_total") is not None
-                and stats["detail_numeric_total"] != resource["expected_detail_numeric_total"]):
-            raise ValueError(f"{path.name}: detail count mismatch against pinned release")
-        if (resource.get("expected_published_total_rows") is not None
-                and stats["published_total_rows"] != resource["expected_published_total_rows"]):
-            raise ValueError(f"{path.name}: published grand-total row count mismatch against pinned release")
         if pairs:
             stats["state_vehicle_type_controls"] = {
                 key: {"sum_numeric": nums[0], "suppressed_cells": nums[1]}

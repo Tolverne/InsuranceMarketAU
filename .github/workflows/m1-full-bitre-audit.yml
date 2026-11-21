@@ -1,9 +1,6 @@
 name: M1 full BITRE source-profile audit
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-full-bitre-audit.yml"
   workflow_dispatch:
 
 permissions:
