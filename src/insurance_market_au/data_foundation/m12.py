@@ -100,7 +100,9 @@ def select_sources(root: Path, cfg: dict, groups: set[str]) -> tuple[list[dict],
     warnings=[]
     for sid, row in sorted(rows.items()):
         spec=match_source(cfg,sid)
-        if spec is None or spec["group"] not in groups or spec["tier"]=="quarantined":
+        if (spec is None or spec["tier"]=="quarantined"
+                or not (spec["group"] in groups
+                        or (spec["group"]=="sa_mirror" and "sa" in groups))):
             continue
         try:
             path=_resolve_acquired_path(root,raw,row)
@@ -318,6 +320,8 @@ def scan_source(item: dict, *, root: Path=ROOT,
         "members":[],"observed_dates":{},"raw_header_by_member":{},
         "sample_limit_per_member":limit_rows,
         "bitre_comparability":"not_directly_equivalent_universe_vintage_and_or_geography",
+        "cross_month_total_is_not_a_fleet_total":spec["date_policy"]=="zip_member_month",
+        "source_class_crosswalk_approved":False,
         "parquet_file":str(output) if parquet else None,
     }
     try:
