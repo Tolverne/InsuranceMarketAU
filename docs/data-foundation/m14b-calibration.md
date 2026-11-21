@@ -73,3 +73,20 @@ The calibration layer does not upload data to the pricing engine, change any liv
 Training hyperparameters, update order and source coverage gates are **predeclared** and versioned in `catalog/calibration/m14b-policy.json`; we do **not** select parameters to optimise B26-14/16/17. The withheld comparison is intended to answer whether a conditional fitting change transfers to unseen published aggregate views. If the holdout fails to improve, or improvements are outweighed by increased rare-segment errors, retain M1.3b as the default and investigate new synthetic support, conditional dependence and source confidentialisation before a broader release.
 
 The **correct commercial next step is not market-share forecasting yet**. Investigate the high-dimensional independent residuals for old vehicles, rare makes and postcode intersections, then produce a properly documented candidate synthetic population with uncertainty ranges, source licence/privacy review and downstream data contracts before feeding a pricing or choice simulator.
+
+## First real-source M1.4b result — mixed, not release-ready
+
+The [completed official-source training and three-holdout audit](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44962288896) built the baseline 85,000-row weighted sample with seed 42, recalibrated it **without touching its attributes or original base expected masses**, and then evaluated exactly the same synthetic row support against independently withheld publisher projections. Maximum difference in an original four-way cell was **3.5 × 10^-10 expected vehicles**.
+
+| Held-out projection (published cells >=100) | Unmodified M1.3b WAPE | M1.4b candidate WAPE | Candidate minus baseline |
+|---|---:|---:|---:|
+| B26-14 — class/year/fuel/make/model | 53.98% | **47.77%** | -6.21 percentage points |
+| B26-16 — class/state/registration postcode/year/make | 154.97% | **175.87%** | +20.90 percentage points |
+| B26-17 — class/state/registration postcode/fuel/make/model | 130.39% | **141.33%** | +10.94 percentage points |
+
+The candidate *improved* all eight comparable **training** conditional objectives, but **worsened both high-dimensional registration-postcode holdouts**. The fraction of published high-count cells represented by the 85,000-row sample remained only 43.26% (B26-14), 13.60% (B26-16) and 17.07% (B26-17). Because M1.4b reweights existing rows, it cannot increase this source-key coverage.
+
+**Conclusion:** fitting published training margins better does not automatically generalise to independently published location/model relationships. The M1.3b baseline remains the Streamlit default, and neither model is a validated commercial postcode-level synthetic population. The M1.4b result should be used for model-method research, not market-size or pricing decisions. We should next examine source support, coarse geographical hierarchies and alternative joint sampling approaches; any further improvements must use fresh validation design rather than tuning parameters on the already consulted B26-14/16/17 holdouts.
+
+Full versioned evidence and independent source SHAs are in `catalog/calibration/m14b-verified-pilot.json`. These published-cell WAPEs are NOT measures of true individual-vehicle prediction error.
+

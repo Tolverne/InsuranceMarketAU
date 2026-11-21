@@ -1,0 +1,116 @@
+{
+  "version": "0.1.0",
+  "milestone": "M1.4b",
+  "model_version": "m14b-soft-conditional-v1",
+  "source_release": "BITRE Road vehicles Australia January 2026",
+  "run_url": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44962288896",
+  "same_support_sample": {
+    "synthetic_rows": 85000,
+    "seed": 42,
+    "fourway_control_cells": 64008,
+    "national_expected_vehicles": 22771150,
+    "maximum_fourway_cell_mass_error": 3.4924596548080444e-10,
+    "only_expected_vehicle_weight_changed": true
+  },
+  "eight_training_projections": [
+    "B26-15",
+    "B26-07",
+    "B26-05",
+    "B26-13",
+    "B26-08",
+    "B26-06",
+    "B26-04",
+    "B26-09"
+  ],
+  "strictly_withheld_source_checks": [
+    {
+      "id": "B26-14",
+      "sha256": "d82e75697a7435d3c2ea5d1e3d37ea5a615016b7a67225eb417c339e16699f30",
+      "published_comparison_cells_ge100": 14273,
+      "published_cell_support_fraction": 0.4325649828347229,
+      "baseline_WAPE": 0.5397758396885628,
+      "candidate_WAPE": 0.4776669532687571,
+      "delta_WAPE": -0.06210888641980569
+    },
+    {
+      "id": "B26-16",
+      "sha256": "15fa83430c7ffdcb88e708a7bce4160e0db9489a27e67da7dacabd30a1c2486a",
+      "published_comparison_cells_ge100": 26548,
+      "published_cell_support_fraction": 0.13601777911707097,
+      "baseline_WAPE": 1.5497338129556817,
+      "candidate_WAPE": 1.7587169795398363,
+      "delta_WAPE": 0.20898316658415445
+    },
+    {
+      "id": "B26-17",
+      "sha256": "603a3cb85dc1d34323968ce7c410d3b43361eadde86d279602d5d9d8ed960ce6",
+      "published_comparison_cells_ge100": 41879,
+      "published_cell_support_fraction": 0.17065832517490867,
+      "baseline_WAPE": 1.3038840624322738,
+      "candidate_WAPE": 1.4133339324064336,
+      "delta_WAPE": 0.10944986997415984
+    }
+  ],
+  "training_comparable_conditional_error_before_after": [
+    {
+      "id": "B26-15",
+      "eligible_scopes": 2088,
+      "before": 0.5679802385140422,
+      "after": 0.4627310200365913
+    },
+    {
+      "id": "B26-07",
+      "eligible_scopes": 602,
+      "before": 0.4021087835887521,
+      "after": 0.2971234578673375
+    },
+    {
+      "id": "B26-05",
+      "eligible_scopes": 40,
+      "before": 0.23537400430420066,
+      "after": 0.1797563469881229
+    },
+    {
+      "id": "B26-13",
+      "eligible_scopes": 685,
+      "before": 0.6737515558426426,
+      "after": 0.5372489164996039
+    },
+    {
+      "id": "B26-08",
+      "eligible_scopes": 600,
+      "before": 0.580977569489053,
+      "after": 0.4592649682042795
+    },
+    {
+      "id": "B26-06",
+      "eligible_scopes": 186,
+      "before": 0.41867939268069015,
+      "after": 0.2649233018355775
+    },
+    {
+      "id": "B26-04",
+      "eligible_scopes": 80,
+      "before": 0.3427957801327181,
+      "after": 0.21911750272479824
+    },
+    {
+      "id": "B26-09",
+      "eligible_scopes": 188,
+      "before": 0.40523801398611825,
+      "after": 0.3074463723003675
+    }
+  ],
+  "model_research_findings": {
+    "historical_make_model_fuel_holdout_improved": true,
+    "registration_geographic_holdouts_improved": false,
+    "original_fourway_control_preserved": true,
+    "sample_support_coverage_unaltered": true,
+    "training_error_improved_all_eight": true,
+    "statistical_individual_vehicle_accuracy_established": false,
+    "automatic_population_promotion_approved": false,
+    "decision": "retain M1.3b as explorer default; only expose M1.4b as experimental comparison",
+    "next_action": "investigate geography-conditioning support and publication semantic limits without tuning on reserved B26-14/16/17",
+    "disclosure_note": "Source WAPE uses released counts >=100 from confidentialised publisher cross-tabs, not actual vehicle-level truth."
+  }
+}
