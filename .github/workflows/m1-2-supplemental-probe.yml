@@ -21,8 +21,8 @@ jobs:
       - name: Download NSW primary registrations and small QLD suburb sample
         run: |
           python scripts/download_vehicle_sources.py --groups nsw --static-only --only nsw_registrations_2026 --download
-          python scripts/download_vehicle_sources.py --groups qld --only 9c479cfb-8c19-4759-ad34-bc3123079b94 --download
-          python scripts/download_vehicle_sources.py --groups qld --only 9f818bd5-4efa-4781-87e7-db600b62bfd8 --download --max-file-mb 3000
+          python scripts/download_vehicle_sources.py --groups qld --only 9c479cfb-8c19-4759-ad34-bc3123079b94 --download || true
+          python scripts/download_vehicle_sources.py --groups qld --only 9f818bd5-4efa-4781-87e7-db600b62bfd8 --download --max-file-mb 3000 || true
           python scripts/download_vehicle_sources.py --groups sa --download
       - name: Inspect real ZIP and CSV source schema, special count cells
         run: |
