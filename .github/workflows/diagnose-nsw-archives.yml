@@ -1,0 +1,51 @@
+name: Diagnose NSW registration source archives
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/diagnose-nsw-archives.yml"
+      - "catalog/acquisition/download-sources.json"
+      - "scripts/download_vehicle_sources.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-nsw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download NSW age and heavy configuration archives
+        run: |
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_age_2026 --download --report data/reports/nsw-age.json
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_heavy_2026 --download --report data/reports/nsw-heavy.json
+      - name: Report SHA-256 and ZIP member metadata
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, zipfile
+          root = pathlib.Path("data/raw/nsw/2026")
+          files = sorted(root.glob("*.zip"))
+          result = {}
+          for f in files:
+              with zipfile.ZipFile(f) as zf:
+                  members = [{"name": z.filename, "size": z.file_size, "crc": z.CRC}
+                            for z in zf.infolist()]
+                  # Detect intended content from first CSV header only.
+                  first_csv = next((z for z in zf.infolist() if z.filename.lower().endswith(".csv")), None)
+                  header = zf.open(first_csv).read(512).splitlines()[0].decode("utf-8-sig", errors="replace") if first_csv else None
+              digest = hashlib.sha256(f.read_bytes()).hexdigest()
+              result[f.name] = {"sha256": digest, "members": members, "first_csv_header": header}
+          print("NSW_SOURCE_AUDIT=" + json.dumps(result, indent=2))
+          if len(result) != 2:
+              raise SystemExit(f"Expected 2 ZIPs; found {len(result)}")
+          hashes = {x["sha256"] for x in result.values()}
+          if len(hashes) == 1:
+              print("SOURCE_ALERT: age and heavy 2026 download URLs return IDENTICAL bytes")
+          else:
+              print("SOURCE_OK: distinct age and heavy ZIP bytes")
+          PY
