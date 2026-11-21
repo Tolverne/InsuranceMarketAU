@@ -70,6 +70,14 @@ if CALIBRATED_SOURCE.exists() and not calibration_ready:
         "A calibrated sample exists but is missing its validated provenance or "
         "refers to an older baseline. Re-run py -3 scripts/m14b_calibrate.py."
     )
+if SOURCE == CALIBRATED_SOURCE:
+    st.warning(
+        "Research candidate selected. The first independent BITRE audit improved "
+        "B26-14 make/model/year/fuel fit but worsened B26-16 and B26-17 "
+        "registration-postcode holdouts at 85,000 sampled rows. "
+        "Do NOT treat this as an approved commercial population.",
+        icon="⚠️",
+    )
 
 @st.cache_data(show_spinner=False)
 def get_data(src: str, report_path: str, sample_mtime_ns: int, report_mtime_ns: int):
@@ -332,6 +340,23 @@ with calibration_tab:
                     for x in comparison["comparison"]
                 ])
                 st.dataframe(checks, hide_index=True, use_container_width=True)
+                regressions = [
+                    entry["projection_id"] for entry in comparison["comparison"]
+                    if entry["delta_candidate_minus_baseline_WAPE"] is not None
+                    and entry["delta_candidate_minus_baseline_WAPE"] > 0
+                ]
+                if regressions:
+                    st.error(
+                        "Candidate has WORSE independently published holdout WAPE "
+                        "for " + ", ".join(regressions) +
+                        ". Keep the M1.3b baseline as the default and "
+                        "do not use the candidate for pricing or market-size claims."
+                    )
+                else:
+                    st.info(
+                        "No measured holdout regression in this comparison. "
+                        "This is not a statistical approval or a population-release decision."
+                    )
             else:
                 st.info("Withheld-source comparison is stale; run py -3 scripts/m14b_calibrate.py --validate-only.")
         else:
