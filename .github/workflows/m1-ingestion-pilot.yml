@@ -1,0 +1,64 @@
+name: M1 real BITRE ingestion pilot
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/data_foundation/m1.py"
+      - "scripts/m1_ingest.py"
+      - ".github/workflows/m1-ingestion-pilot.yml"
+      - "catalog/acquisition/bitre-2026-acquired-metadata.json"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bitre-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install data engineering dependencies
+        run: python -m pip install -e ".[data,dev]"
+      - name: Acquire three small verified BITRE sources
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only 8f7a9a86-130e-4d97-8a91-1bef302c27c9 --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 16b61938-22e8-4c85-b067-c3ecd63ca05f --download
+          python scripts/download_vehicle_sources.py --groups bitre --only be196cd3-7196-4da8-b18a-13e7576fb9ee --download
+      - name: Produce a real three-projection Parquet staging pilot
+        run: |
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03 --parquet --batch-rows 1024
+      - name: Check staged schema and profile assertions
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          report = json.loads(Path("data/reports/m1/bitre-2026-profile.json").read_text())
+          assert report["projection_count"] == 3
+          assert report["complete_17"] is False
+          assert report["source_checksum_verified"] is True
+          assert report["outputs"] == "parquet"
+          for item in report["profiles"]:
+              assert item["rows"] > 0, item["projection_id"]
+              f = Path(item["parquet_file"])
+              pf = pq.ParquetFile(f)
+              assert pf.metadata.num_rows == item["rows"]
+              print("M1_REAL_PROFILE", item["projection_id"], "rows", item["rows"],
+                    "numeric", item["numeric_rows"], "suppressed", item["suppressed_rows"],
+                    "numeric_total", item["numeric_total"],
+                    "headers", item["headers"])
+          print("M1_REAL_TOTAL", sum(x["rows"] for x in report["profiles"]))
+          PY
+      - name: Upload SAFE report only (no source or Parquet rows)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-bitre-profile-${{ github.run_id }}
+          path: data/reports/m1/bitre-2026-profile.json
+          if-no-files-found: ignore
+          retention-days: 14
