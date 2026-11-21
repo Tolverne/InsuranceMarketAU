@@ -475,6 +475,8 @@ def build_weighted_sample(root: Path = ROOT, *, rows: int = 220000,
         flush()
         writer.close()
         writer = None
+        if current_id != rows or abs(actual_weighted_mass - TOTAL) > 0.1:
+            raise ValueError("M1.3b weighted sample fails national expected mass invariant")
         os.replace(temp, output)
     finally:
         sampler.close()

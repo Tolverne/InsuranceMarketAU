@@ -28,15 +28,16 @@ if not SOURCE.is_file() or not REPORT.is_file():
     st.stop()
 
 @st.cache_data(show_spinner=False)
-def get_data(src: str, report_path: str):
+def get_data(src: str, report_path: str, sample_mtime_ns: int, report_mtime_ns: int):
     table = pq.read_table(src).to_pandas()
     meta = json.loads(Path(report_path).read_text(encoding="utf-8"))
     return table, meta
 
 
-df, evidence = get_data(str(SOURCE), str(REPORT))
+df, evidence = get_data(str(SOURCE), str(REPORT), SOURCE.stat().st_mtime_ns, REPORT.stat().st_mtime_ns)
 if (not df["is_synthetic"].all()
-    or evidence["status"] != "weighted_synthetic_analytic_POC_not_fleet_release"):
+    or evidence["status"] != "weighted_synthetic_analytic_POC_not_fleet_release"
+    or len(df) != evidence["rows"]):
     st.error("The local sample has not passed the M1.3b safety/lineage contract.")
     st.stop()
 
