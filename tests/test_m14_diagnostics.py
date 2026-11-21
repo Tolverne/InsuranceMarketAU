@@ -172,3 +172,22 @@ def test_pinned_m14_governance_matches_code():
     assert set(policy["sensitivity_predeclared"]["sizes"]) == {85000,220000}
     assert policy["market_release_gate"]["high_dimensional_model_validated"] is False
     assert policy["market_release_gate"]["commercial_addressable_market_approved"] is False
+
+
+def test_pinned_real_pilot_has_no_unsupported_acceptance_claim():
+    from insurance_market_au.data_foundation.m1 import ROOT, load_bitre_catalog
+    m = json.loads(
+        (ROOT / "catalog/validation/m14-verified-source-pilot.json").read_text(encoding="utf-8")
+    )
+    indexed = {x["projection_id"]: x for x in load_bitre_catalog(ROOT)}
+    assert m["source"]["sha256"] == indexed[m14.HELDOUT_ID]["sha256"]
+    assert m["source"]["original_published_cell_count_threshold"] == m14.MIN_PUBLISHED
+    assert m["baseline"]["fourway_support_cells"] == 64008
+    assert m["baseline"]["maximum_original_fourway_expected_mass_error"] < 1e-5
+    assert m["baseline"]["source_published_cell_WAPE"] > 0.5
+    runs = m["seed_size_study"]["study"]
+    assert runs[0]["sample_rows"] == 85000
+    assert runs[1]["sample_rows"] == 120000
+    assert runs[1]["mean_B26_14_WAPE"] < runs[0]["mean_B26_14_WAPE"]
+    assert m["release_review"]["heldout_error_acceptance_threshold_approved"] is False
+    assert m["release_review"]["commercial_population_release_created"] is False

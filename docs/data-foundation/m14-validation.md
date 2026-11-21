@@ -58,3 +58,17 @@ The existing local files data/processed/m13b/weighted-synthetic-fleet.parquet an
 5. **M1.4b calibration:** replace/augment the current conditional mixtures with source-compatible, disclosure-aware soft calibration and smoothing, fitting **only** the original M1.3b training projections B26-04/05/06/07/08/09/13/15. Reserve B26-14/16/17 as tests. Retain the original M1.3a four-way accounting controls and distinguish registered from garaging geography.
 
 M1.4a is diagnostic research. It **does not** certify the national synthetic population, create a 22.77-million-record release or imply that registered vehicles equal potential insured customers.
+
+## Official-source results recorded by M1.4a
+
+The completed [real-data diagnostic and seed sensitivity audit](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44874258572) passed the source, reproducibility and original four-way model-integrity checks. The independent B26-14 input SHA and report summary are pinned in catalog/validation/m14-verified-source-pilot.json.
+
+| Metric (source-published cells >=100) | 85,000 rows, two seeds | 120,000 rows, two seeds |
+|---|---:|---:|
+| Mean B26-14 published-cell WAPE | 53.45% | 41.28% |
+| Mean share of published comparison keys represented | 42.88% | 60.50% |
+| Mean B26-14 pre-1980 WAPE | 99.17% | 69.10% |
+| Across-seed SD of WAPE (percentage points) | 0.032 | 0.190 |
+
+The baseline 85,000-row sample with seed 42 had WAPE 53.98%, source-key coverage 43.26%, and maximum error in preserving an original four-way population mass of approximately 1.2e-9 vehicles. A larger sample consistently reduces aggregate discrepancy and improves source-cell coverage in this limited experiment. However, even the 120,000-row **pre-1980** error remains high; we have **not** demonstrated that residual model bias is fully explained by the Monte Carlo sample size. Nor are these standard deviations calibrated credibility intervals for actual fleet counts. Model release approval remains explicitly false.
+
