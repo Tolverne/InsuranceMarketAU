@@ -1,0 +1,54 @@
+name: M1 evidence probe for BITRE source headers
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-source-evidence.yml"
+      - "scripts/m1*"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download three small BITRE 2026 projections and explanatory notes
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only 8f7a9a86-130e-4d97-8a91-1bef302c27c9 --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 16b61938-22e8-4c85-b067-c3ecd63ca05f --download
+          python scripts/download_vehicle_sources.py --groups bitre --only be196cd3-7196-4da8-b18a-13e7576fb9ee --download
+          python scripts/download_vehicle_sources.py --groups bitre --only d03f7dd0-d75d-4132-bd3d-c5f13d47b2b8 --download
+      - name: Print basic structural evidence, not full records
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import csv
+          import re
+          for path in sorted(Path("data/raw/bitre/2026-01-31").glob("*")):
+              print(f"M1_EVIDENCE_FILE {path.name}")
+              if path.suffix==".csv":
+                  with path.open(encoding="utf-8-sig", newline="") as f:
+                      head=f.read(4096)
+                      f.seek(0)
+                      print("M1_CSV_FIRST_LINES", repr(head.splitlines()[:3])[:800])
+                      try:
+                          delimiter=csv.Sniffer().sniff(head, delimiters=",;|\t").delimiter
+                      except csv.Error:
+                          delimiter=","
+                      reader=csv.reader(f, delimiter=delimiter)
+                      names=next(reader)
+                      print("M1_HEADER", repr(names))
+                      for i,row in zip(range(2), reader):
+                          print("M1_ROW_TYPES", [("number" if re.fullmatch(r"-?\d+(\.\d+)?", c.strip()) else "text") for c in row])
+              elif path.suffix==".txt":
+                  text=path.read_text(encoding="utf-8-sig", errors="replace")
+                  print("M1_NOTES_BYTES",path.stat().st_size)
+                  print("M1_NOTE_LINES", len(text.splitlines()))
+                  for ln in text.splitlines():
+                      if any(word in ln.casefold() for word in ("confidential", "random", "round", "suppres", "postcode", "totals", "unrestrict")):
+                          print("M1_NOTES_TOPIC",repr(ln[:220]))
+          PY

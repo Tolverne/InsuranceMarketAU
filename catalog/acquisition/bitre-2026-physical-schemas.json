@@ -1,0 +1,288 @@
+{
+  "version": "0.1.0",
+  "source": "BITRE Road vehicles Australia January 2026",
+  "observed_reference_date": "2026-01-31",
+  "evidence_url": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44843689743",
+  "population_control": 22771150,
+  "descriptions": [
+    "Rows are confidentialised aggregate cells across 17 separate projections, not vehicle-level records.",
+    "Each projection has exactly one published grand total and all have detail-only numeric sum 22771150.",
+    "No nonnumeric count tokens were observed in this snapshot; this does not mean there was no suppression or perturbation."
+  ],
+  "projection_schemas": [
+    {
+      "projection_id": "B26-01",
+      "rows": 10161,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "year_of_manufacture",
+        "no_vehicles"
+      ],
+      "resource_id": "8f7a9a86-130e-4d97-8a91-1bef302c27c9",
+      "sha256": "457a35fb826605af393119fd65ee9b7af4e4ffcbc973298d97f7a4b8c48ef0ae"
+    },
+    {
+      "projection_id": "B26-02",
+      "rows": 8002,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "year_of_manufacture",
+        "vehicle_type",
+        "motive_power",
+        "no_vehicles"
+      ],
+      "resource_id": "16b61938-22e8-4c85-b067-c3ecd63ca05f",
+      "sha256": "88954e9870ee191adf72fb236ed5a4294a3634eb032e8d2c5bc9ffa4d9b752a2"
+    },
+    {
+      "projection_id": "B26-03",
+      "rows": 505,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "state_abb",
+        "vehicle_type",
+        "motive_power",
+        "no_vehicles"
+      ],
+      "resource_id": "be196cd3-7196-4da8-b18a-13e7576fb9ee",
+      "sha256": "ebd87de63d968ba485b4f59bc310055de47ff35da980d6318998787f0302c214"
+    },
+    {
+      "projection_id": "B26-04",
+      "rows": 39508,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "no_vehicles"
+      ],
+      "resource_id": "222106ae-9eae-4ad4-a777-749e0be84aef",
+      "sha256": "10f0c42cb6f9086c9adfc03c1d5d94d97fe2d9b97fbe752eec278be52ad6cc90"
+    },
+    {
+      "projection_id": "B26-05",
+      "rows": 11646,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "motive_power",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "7e12cd3c-e82d-4c0d-a5cd-de24f6f23970",
+      "sha256": "d8ab58c3ad487448a96750940bf4ecbe466dc019b1a5df484df6b755da19016f"
+    },
+    {
+      "projection_id": "B26-06",
+      "rows": 77214,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "motive_power",
+        "no_vehicles"
+      ],
+      "resource_id": "8a4584c2-28b9-431d-a592-b7e7b00883aa",
+      "sha256": "28e4bebdc44198275809a1759033e29f34858211ebdb27496dfd563f008bff89"
+    },
+    {
+      "projection_id": "B26-07",
+      "rows": 79938,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "year_of_manufacture",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "143603fc-2cc3-4f82-8094-5c32b1c7062c",
+      "sha256": "fb1f9199171379b5488d766fc8fae64c2d05655b1a816c9096bcd7111357716b"
+    },
+    {
+      "projection_id": "B26-08",
+      "rows": 689898,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "year_of_manufacture",
+        "no_vehicles"
+      ],
+      "resource_id": "692a7f4d-dc2b-41fb-8e97-1b3a82386b1a",
+      "sha256": "d6130e1c86ce377d83b4bec2098e53a1a3590ed54740d8a28ccb6d6447492bda"
+    },
+    {
+      "projection_id": "B26-09",
+      "rows": 65488,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "garaging_postcode",
+        "motive_power",
+        "no_vehicles"
+      ],
+      "resource_id": "cb14ca8c-2db0-4637-93a4-76efa24e0035",
+      "sha256": "99ddee89540b8ee72b3c7d93f62119a255e86118bceddf0148c949b72b33b81d"
+    },
+    {
+      "projection_id": "B26-10",
+      "rows": 64009,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "motive_power",
+        "year_of_manufacture",
+        "no_vehicles"
+      ],
+      "resource_id": "b29bd94e-2789-455b-a0f3-7a06ca397be5",
+      "sha256": "182be155b6cd3f31330fb2bd5d254d71b49f104b2795d9b834e7755023ee89fa"
+    },
+    {
+      "projection_id": "B26-11",
+      "rows": 1812676,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "registered_postcode",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "de2a322d-7217-46dd-a215-f46cb69f4104",
+      "sha256": "5a2967644965ac29ebf79223ce87127f9975886a7e3115571506f13e75b8e0b0"
+    },
+    {
+      "projection_id": "B26-12",
+      "rows": 1818232,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "garaging_postcode",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "ac4035c5-9471-4080-8326-968838341ad1",
+      "sha256": "44e4a7a78786f17fa0467933a7e4f8b8269bf50097da3e08ae83f0d162cd4476"
+    },
+    {
+      "projection_id": "B26-13",
+      "rows": 1862925,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "7ec456c9-5262-4400-9707-a0d7e9bcfcec",
+      "sha256": "ed30a5b017e147a05a7e4e9ed91eff829be5b0814701144369058934f42c104d"
+    },
+    {
+      "projection_id": "B26-14",
+      "rows": 93900,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "year_of_manufacture",
+        "motive_power",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "3ab701dd-5539-400d-9424-9fa0d25e1760",
+      "sha256": "d82e75697a7435d3c2ea5d1e3d37ea5a615016b7a67225eb417c339e16699f30"
+    },
+    {
+      "projection_id": "B26-15",
+      "rows": 276832,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "year_of_manufacture",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "fe9f2b88-7d5d-490f-b932-db990bb45397",
+      "sha256": "c5cb4d74ba226b9a9275e9c37813e272393e77058e46ebbc21596310c3406f0c"
+    },
+    {
+      "projection_id": "B26-16",
+      "rows": 3109913,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "year_of_manufacture",
+        "make",
+        "no_vehicles"
+      ],
+      "resource_id": "afa99125-baa8-49a6-8d12-ca4a47d6dac4",
+      "sha256": "15fa83430c7ffdcb88e708a7bce4160e0db9489a27e67da7dacabd30a1c2486a"
+    },
+    {
+      "projection_id": "B26-17",
+      "rows": 2160798,
+      "detail_numeric_total": 22771150,
+      "published_total_rows": 1,
+      "nonnumeric_count_tokens": 0,
+      "headers": [
+        "vehicle_type",
+        "state_abb",
+        "registered_postcode",
+        "motive_power",
+        "make",
+        "model",
+        "no_vehicles"
+      ],
+      "resource_id": "f6fe4a4c-3af5-400b-bb05-047614e0ce65",
+      "sha256": "603a3cb85dc1d34323968ce7c410d3b43361eadde86d279602d5d9d8ed960ce6"
+    }
+  ]
+}

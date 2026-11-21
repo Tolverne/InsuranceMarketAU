@@ -14,3 +14,5 @@
 - [Governance](governance/README.md)
 
 **Document status:** these are v0.1 proposed architecture and design artefacts, not evidence of completed ingestion or model validation.
+
+- [M1.0 BITRE ingestion, profiling and Parquet staging](data-foundation/m1-implementation.md)
