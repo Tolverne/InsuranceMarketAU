@@ -1,0 +1,31 @@
+name: M1.4b capped soft calibration regression and source firewall
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/data_foundation/m14b.py"
+      - "scripts/m14b_calibrate.py"
+      - "tests/test_m14b_calibration.py"
+      - "apps/m13b_explorer.py"
+      - ".github/workflows/m1-4b-regression.yml"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calibrated-weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project with data, model and test dependencies
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Compile calibration and explorer entrypoints
+        run: python -m py_compile src/insurance_market_au/data_foundation/m14b.py scripts/m14b_calibrate.py apps/m13b_explorer.py
+      - name: Regression: exact base control, heldout isolation and immutable baseline
+        run: python -m pytest -q tests/test_m14b_calibration.py tests/test_m14_diagnostics.py tests/test_m13b_conditional.py tests/test_m13_calibration.py
