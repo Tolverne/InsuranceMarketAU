@@ -60,7 +60,9 @@
       "format": "zip",
       "kind": "stock",
       "source": "publisher",
-      "licence_status": "pending_review"
+      "licence_status": "pending_review",
+      "expected_zip_member_contains": "Age_of_Registered_Vehicles",
+      "known_issue": "Verified 2026-11-21: official age URL returned the heavy-vehicle configuration ZIP (sha256 a7add6b6a590...). Expected to fail role validation until publisher fixes download content."
     },
     {
       "id": "nsw_usage_2026",
@@ -82,7 +84,8 @@
       "format": "zip",
       "kind": "stock",
       "source": "publisher",
-      "licence_status": "pending_review"
+      "licence_status": "pending_review",
+      "expected_zip_member_contains": "Registered_Heavy_Vehicles_by_Configuration"
     },
     {
       "id": "nsw_transactions_2026",

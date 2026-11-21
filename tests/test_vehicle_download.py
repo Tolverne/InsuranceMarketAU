@@ -5,6 +5,8 @@ from importlib.util import module_from_spec, spec_from_file_location
 import hashlib
 import json
 from pathlib import Path
+from io import BytesIO
+from zipfile import ZipFile
 
 import pytest
 
@@ -128,3 +130,45 @@ def test_reject_html_masquerading_as_csv(monkeypatch, tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match="HTML"):
         mod.download_resource(resource, tmp_path / "out", timeout=1, max_bytes=100)
     assert not list((tmp_path / "out").rglob("*.csv"))
+
+
+def _zip_bytes(name: str) -> bytes:
+    buffer = BytesIO()
+    with ZipFile(buffer, "w") as archive:
+        archive.writestr(name, "vehicle_type,COUNT\\npassenger,2\\n")
+    return buffer.getvalue()
+
+
+def test_nsw_age_archive_rejects_heavy_vehicle_payload(monkeypatch, tmp_path: Path) -> None:
+    """Reproduce the actual government age/ZIP mismatch with artificial ZIP bytes."""
+    resource = {
+        "id": "nsw_age_2026", "group": "nsw", "reference_date": "2026",
+        "kind": "stock", "format": "zip",
+        "expected_zip_member_contains": "Age_of_Registered_Vehicles",
+        "url": "https://opendata.transport.nsw.gov.au/file.zip",
+    }
+    data = _zip_bytes("TfNSW_Registered_Heavy_Vehicles_by_Configuration_Snapshot_202601_1.csv")
+    monkeypatch.setattr(mod, "urlopen", lambda *a, **kw: FakeResponse(data, resource["url"]))
+    with pytest.raises(RuntimeError, match="Source content mismatch"):
+        mod.download_resource(resource, tmp_path, timeout=2, max_bytes=4096)
+    assert not list(tmp_path.rglob("*.zip"))
+    assert not list(tmp_path.rglob("*.part"))
+
+
+def test_nsw_age_archive_accepts_correct_members(monkeypatch, tmp_path: Path) -> None:
+    resource = {
+        "id": "nsw_age_2026", "group": "nsw", "reference_date": "2026",
+        "kind": "stock", "format": "zip",
+        "expected_zip_member_contains": "Age_of_Registered_Vehicles",
+        "url": "https://opendata.transport.nsw.gov.au/file.zip",
+    }
+    data = _zip_bytes("TfNSW_Age_of_Registered_Vehicles_Snapshot_202601_1.csv")
+    monkeypatch.setattr(mod, "urlopen", lambda *a, **kw: FakeResponse(data, resource["url"]))
+    assert mod.download_resource(resource, tmp_path, timeout=2, max_bytes=4096)["status"] == "downloaded"
+
+
+def test_nsw_source_role_guards_present() -> None:
+    config = json.loads(mod.CATALOGUE.read_text())
+    resources = {x["id"]: x for x in config["static_resources"]}
+    assert "Age_of_Registered_Vehicles" == resources["nsw_age_2026"]["expected_zip_member_contains"]
+    assert "Registered_Heavy_Vehicles_by_Configuration" == resources["nsw_heavy_2026"]["expected_zip_member_contains"]

@@ -26,6 +26,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
+from zipfile import BadZipFile, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGUE = ROOT / "catalog/acquisition/download-sources.json"
@@ -152,6 +153,27 @@ def file_signature_ok(path: Path, ext: str) -> None:
         raise ValueError("PDF extension but response is not a PDF")
 
 
+def validate_zip_role(path: Path, resource: dict) -> None:
+    """Reject correctly formatted ZIP files containing the *wrong* source table.
+
+    This check addresses a confirmed TfNSW publisher issue: the 2026 age
+    snapshot URL currently delivers the heavy configuration archive.
+    """
+    expected = resource.get("expected_zip_member_contains")
+    if not expected:
+        return
+    with ZipFile(path) as archive:
+        csv_names = [entry.filename for entry in archive.infolist()
+                     if not entry.is_dir() and entry.filename.lower().endswith(".csv")]
+    if not csv_names or not all(expected.casefold() in name.casefold() for name in csv_names):
+        observed = ", ".join(csv_names[:3]) or "(no CSV members)"
+        raise ValueError(
+            f"Source content mismatch for {resource['id']}: expected ZIP CSV members "
+            f"containing {expected!r}; observed {observed}. "
+            "Quarantine this resource; do not treat it as the expected dataset."
+        )
+
+
 def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int,
                       tries: int = 3) -> dict:
     url = resource["url"]
@@ -193,6 +215,8 @@ def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int
                         fp.write(chunk)
                         digest.update(chunk)
             file_signature_ok(tmp, ext)
+            if ext == "zip":
+                validate_zip_role(tmp, resource)
             checksum = digest.hexdigest()
             name = slug(resource["id"], 55) + "--" + checksum[:12] + "." + ext
             final = folder / name
@@ -209,7 +233,7 @@ def download_resource(resource: dict, output: Path, timeout: int, max_bytes: int
                 "official_source_url": resource.get("official_source_url"),
                 "attribution": resource.get("attribution"),
             }
-        except (HTTPError, URLError, OSError, ValueError, TimeoutError) as exc:
+        except (HTTPError, URLError, OSError, ValueError, BadZipFile, TimeoutError) as exc:
             last_error = exc
             if tmp is not None:
                 tmp.unlink(missing_ok=True)
