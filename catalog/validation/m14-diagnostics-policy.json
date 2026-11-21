@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1.0",
+  "milestone": "M1.4a",
+  "model_name": "InsuranceMarketAU fourway calibrated base + conditional make/model/postcode extension",
+  "reference_date": "2026-01-31",
+  "population_universe": "BITRE registered motor vehicles, not insured exposures",
+  "accounting_anchor": 22771150,
+  "validation": {
+    "independent_source": "B26-14",
+    "excluded_training_source_ids": [
+      "B26-14",
+      "B26-16",
+      "B26-17"
+    ],
+    "minimum_original_published_cell_count": 100,
+    "disclosure_warning": "Counts are independently published and confidentialised, not ground-truth microdata",
+    "source_hash_and_row_count_validation": true,
+    "fourway_cell_mass_exactness_required": true,
+    "fourway_max_count_error_tolerance": 0.00001,
+    "per_vehicle_ground_truth_asserted": false
+  },
+  "sensitivity_predeclared": {
+    "sizes": [
+      85000,
+      220000
+    ],
+    "seeds": [
+      17,
+      53,
+      91
+    ],
+    "parameter_tuning_to_holdout_permitted": false,
+    "across_seed_SD_interpretation": "finite Monte Carlo only; not source uncertainty or confidence interval",
+    "may_overwrite_primary_explorer_sample": false
+  },
+  "market_release_gate": {
+    "high_dimensional_model_validated": false,
+    "disclosure_likelihood_estimated": false,
+    "commercial_addressable_market_approved": false,
+    "license_review_required": true,
+    "holdout_error_threshold_decision": "M1.4b pending; cannot infer acceptance from source-integrity checks",
+    "sampling_zero_is_true_population_zero": false
+  }
+}
