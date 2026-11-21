@@ -1,0 +1,87 @@
+name: M1.2 state harmonisation real-source pilot
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/data_foundation/m12.py"
+      - "catalog/harmonization/m12-sources.json"
+      - "tests/test_m12_harmonisation.py"
+      - "scripts/m12_harmonise.py"
+      - "pyproject.toml"
+      - ".github/workflows/m1-2-harmonisation-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-harmonisation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install engineering/test dependencies
+        run: python -m pip install -e ".[data,dev]"
+      - name: Run fake-source disclosure/stock-flow/snapshot tests
+        run: python -m pytest -q tests/test_m12_harmonisation.py
+      - name: Acquire small source selections from official government portals
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python scripts/download_vehicle_sources.py --groups vic --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_usage_2026 --static-only --download
+          python scripts/download_vehicle_sources.py --groups sa --download
+      - name: Extract M1.1 workbook controls
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import find_workbook,extract_workbook_controls,write_controls
+          book=extract_workbook_controls(find_workbook())
+          assert book["national_total"]==22771150
+          write_controls(book,Path("data/processed/m1/controls"))
+          PY
+      - name: Stage bounded real VIC, NSW and SA sample cells
+        run: python scripts/m12_harmonise.py --groups vic,nsw,sa --sample-rows 30 --parquet --strict
+      - name: Assert source contracts and source-specific dates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          r=json.loads(Path("data/reports/m12/source-profile-sample.json").read_text())
+          p={x["source_id"]:x for x in r["source_profiles"]}
+          assert len(p)==4, list(p)
+          assert not r["source_failures"],r["source_failures"]
+          assert r["sampled_partial_run"]
+          assert r["flow_sources_excluded_from_stock"]==[]
+          assert "vic_postcode_q3_2026" in p
+          assert "vic_model_q3_2026" in p
+          assert "nsw_usage_2026" in p
+          sa=next(x for x in p.values() if x["jurisdiction"]=="SA")
+          assert sa["geography_role"]=="owner_postcode"
+          assert sa["source_rows"]>0
+          nsw=p["nsw_usage_2026"]
+          assert nsw["censored_rows"]>0
+          assert nsw["source_members"]>=10
+          assert nsw["cross_month_total_is_not_a_fleet_total"]
+          assert "2026-01-31" in nsw["observed_dates"]
+          assert p["vic_postcode_q3_2026"]["geography_role"]=="garaging_postcode"
+          assert p["vic_model_q3_2026"]["geography_role"]=="not_present"
+          for x in p.values():
+              f=Path(x["parquet_file"])
+              assert pq.read_metadata(f).num_rows==x["source_rows"],x["source_id"]
+              assert x["alignment_to_bitre"]["direct_count_difference_computed"] is False
+              print("M12_REAL",x["source_id"],"rows",x["source_rows"],
+                    "dates",list(x["observed_dates"]),"censored",x["censored_rows"])
+          print("M12_SOURCE_PILOT_PASSED",len(p))
+          PY
+      - name: Retain profile metadata only (no source or staged data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m12-source-pilot-profile-${{ github.run_id }}
+          path: data/reports/m12/source-profile-sample.json
+          if-no-files-found: ignore
+          retention-days: 14

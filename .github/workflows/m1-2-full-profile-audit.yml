@@ -1,0 +1,73 @@
+name: M1.2 real source full-count profile audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-state-source-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install M1.2 packages
+        run: python -m pip install -e ".[data,dev]"
+      - name: Acquire independently verified first-party evidence
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python scripts/download_vehicle_sources.py --groups vic --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --static-only --only nsw_usage_2026 --download
+          python scripts/download_vehicle_sources.py --groups sa --download
+      - name: Reconstruct official M1.1 Table 1 controls for source-context checking
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import find_workbook,extract_workbook_controls,write_controls
+          w=extract_workbook_controls(find_workbook())
+          write_controls(w,Path('data/processed/m1/controls'))
+          PY
+      - name: Full-source row streaming and vintage profile (not a vehicle count)
+        run: |
+          python scripts/m12_harmonise.py --groups vic,nsw,sa --profile-only --strict
+      - name: Assert full source date, count and scope identities
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('data/reports/m12/source-profile.json').read_text())
+          p={x['source_id']:x for x in r['source_profiles']}
+          assert len(p)==4, list(p)
+          assert not r['source_failures']
+          assert not r['sampled_partial_run']
+          assert r['all_source_rows_processed']>10000
+          assert p['nsw_usage_2026']['source_members']==10
+          assert p['nsw_usage_2026']['censored_rows']>0
+          assert '2026-01-31' in p['nsw_usage_2026']['observed_dates']
+          assert '2026-10-31' in p['nsw_usage_2026']['observed_dates']
+          assert p['vic_postcode_q3_2026']['geography_role']=='garaging_postcode'
+          assert p['vic_model_q3_2026']['geography_role']=='not_present'
+          sa=next(x for x in p.values() if x['jurisdiction']=='SA')
+          assert sa['geography_role']=='owner_postcode'
+          for x in p.values():
+              assert x['alignment_to_bitre']['direct_count_difference_computed'] is False
+              print("M12_FULL_SOURCE",x['source_id'],"rows",x['source_rows'],
+                    "source_members",x['source_members'],
+                    "numeric_cells",x['numeric_rows'],"censored_cells",x['censored_rows'],
+                    "unbounded_cells",x['rows_without_finite_bounds'],
+                    "numeric_sum_over_source_rows",x['count_sum_numeric'],
+                    "periods",len(x['observed_dates']))
+          print("M12_FULL_SOURCE_AUDIT_PASS",len(p),r['all_source_rows_processed'])
+          PY
+      - name: Retain safe aggregated source profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m12-full-state-source-profile-${{ github.run_id }}
+          path: data/reports/m12/source-profile.json
+          if-no-files-found: ignore
+          retention-days: 14

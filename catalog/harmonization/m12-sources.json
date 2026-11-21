@@ -1,0 +1,353 @@
+{
+  "version": "0.1.0",
+  "reference_bitre_date": "2026-01-31",
+  "publisher_date_alignment_policy": "never_scale_later_or_older_stock_counts_to_2026-01_without_model",
+  "scope_notes": [
+    "State/territory files are heterogeneous. No dataset herein is a BITRE-equivalent direct vehicle census by default.",
+    "Published suppressed cells are not exact zeros or measured missing individual vehicles.",
+    "State administrative boundaries, garage/owner/registration addresses, and flow versus stock must remain distinct.",
+    "Queensland 2022 stock may include unit records. Do not infer a numeric 1-per-row count until grain/rights review.",
+    "NSW January 2026 registration snapshot includes trailer types; do not align directly to BITRE registered motor vehicles."
+  ],
+  "sources": [
+    {
+      "id": "vic_postcode_q3_2026",
+      "group": "vic",
+      "state": "Vic",
+      "format": "csv",
+      "date_policy": "fixed",
+      "date": "2026-09-30",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "TOTAL1",
+      "geography_role": "garaging_postcode",
+      "geography_col": "POSTCODE",
+      "scope": "vic_whole_fleet_excludes_trailers_and_boats_not_verified_bitre_equivalent",
+      "fields": {
+        "make": "CD_MAKE_VEH1",
+        "vehicle_type": "CD_CLASS_VEH",
+        "year": "NB_YEAR_MFC_VEH",
+        "fuel": "CD_CL_FUEL_ENG"
+      },
+      "headers": [
+        "CD_MAKE_VEH1",
+        "CD_CLASS_VEH",
+        "NB_YEAR_MFC_VEH",
+        "POSTCODE",
+        "CD_CL_FUEL_ENG",
+        "TOTAL1"
+      ],
+      "tier": "candidate_state_support",
+      "expected_sha256": "085843370244ffc3b956e82564edd62bbc0ebd5dde87932da8c9eab4e73c42ac"
+    },
+    {
+      "id": "vic_model_q3_2026",
+      "group": "vic",
+      "state": "Vic",
+      "format": "csv",
+      "date_policy": "fixed",
+      "date": "2026-09-30",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "TOTAL1",
+      "geography_role": "not_present",
+      "geography_col": null,
+      "scope": "vic_whole_fleet_by_make_model_colour_no_postcode_year_joint",
+      "fields": {
+        "make": "CD_MAKE_VEH1",
+        "model": "CD_MODEL_VEH",
+        "colour": "CD_CLR_BDY_VEH_P"
+      },
+      "headers": [
+        "CD_MAKE_VEH1",
+        "CD_MODEL_VEH",
+        "CD_CLR_BDY_VEH_P",
+        "TOTAL1"
+      ],
+      "tier": "candidate_state_support",
+      "expected_sha256": "1bce46ee689bc2195649d84e354d9bce18015c6d5daa88f3650dbf85c1594572"
+    },
+    {
+      "id": "nsw_registrations_2026",
+      "group": "nsw",
+      "state": "NSW",
+      "format": "zip",
+      "date_policy": "zip_member_month",
+      "date": "2026",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "COUNT",
+      "geography_role": "customer_address_lga",
+      "geography_col": "CUSTOMER ADDRESS LGA",
+      "scope": "nsw_vehicle_register_includes_trailers_and_multi_component_categories",
+      "fields": {
+        "make": "MANUFACTURER",
+        "vehicle_type": "VEHICLE TYPE",
+        "year": "YEAR OF MANUFACTURER",
+        "fuel": "MOTIVE POWER",
+        "shape": "VEHICLE SHAPE",
+        "colour": "VEHICLE COLOUR",
+        "transmission": "TRANSMISSION TYPE"
+      },
+      "headers": [
+        "VEHICLE TYPE",
+        "MANUFACTURER",
+        "YEAR OF MANUFACTURER",
+        "MOTIVE POWER",
+        "TRANSMISSION TYPE",
+        "AXLE CONFIGURATION",
+        "VEHICLE COLOUR",
+        "VEHICLE SHAPE",
+        "CUSTOMER ADDRESS LGA",
+        "COUNT"
+      ],
+      "tier": "censored_stock_support",
+      "expected_sha256": "07bb46c18f741311c6db19b20fe06b99eb0afb1c526ec7646778fc031ab2b567"
+    },
+    {
+      "id": "nsw_age_2026",
+      "group": "nsw",
+      "state": "NSW",
+      "format": "zip",
+      "date_policy": "zip_member_month",
+      "date": "2026",
+      "kind": "stock",
+      "grain": "known_bad_publisher_payload",
+      "measure_col": null,
+      "geography_role": "unknown",
+      "geography_col": null,
+      "fields": {},
+      "headers": [],
+      "tier": "quarantined",
+      "known_issue": "Age dataset source URL returned heavy configuration ZIP. Never load until content independently verified."
+    },
+    {
+      "id": "nsw_usage_2026",
+      "group": "nsw",
+      "state": "NSW",
+      "format": "zip",
+      "date_policy": "zip_member_month",
+      "date": "2026",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "COUNT",
+      "geography_role": "customer_address_lga",
+      "geography_col": "CUSTOMER ADDRESS LGA",
+      "scope": "nsw_usage_snapshot_trailer_inclusive_classification_unmapped",
+      "fields": {
+        "vehicle_type": "VEHICLE TYPE",
+        "usage": "HIGH LEVEL USAGE",
+        "registration_term": "TERM OF REGISTRATION",
+        "plate_type": "PLATE TYPE"
+      },
+      "headers": [
+        "VEHICLE TYPE",
+        "HIGH LEVEL USAGE",
+        "TERM OF REGISTRATION",
+        "PLATE TYPE",
+        "CUSTOMER ADDRESS LGA",
+        "COUNT"
+      ],
+      "tier": "censored_stock_support",
+      "expected_sha256": "d8c389fd3b88158af0fe17319fbdd6a27726c18a825533692a8a695cdd6782e6"
+    },
+    {
+      "id": "nsw_heavy_2026",
+      "group": "nsw",
+      "state": "NSW",
+      "format": "zip",
+      "date_policy": "zip_member_month",
+      "date": "2026",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "COUNT",
+      "geography_role": "customer_address_lga",
+      "geography_col": "CUSTOMER ADDRESS LGA",
+      "scope": "nsw_heavy_vehicle_subset_only_not_state_fleet",
+      "fields": {
+        "vehicle_type": "VEHICLE TYPE",
+        "configuration": "NOMINATED OPERATING CONFIGURATION",
+        "configuration_code": "CONFIGURATION CODE"
+      },
+      "headers": [
+        "VEHICLE TYPE",
+        "NOMINATED OPERATING CONFIGURATION",
+        "CONFIGURATION CODE",
+        "CUSTOMER ADDRESS LGA",
+        "COUNT"
+      ],
+      "tier": "subset_stock_support",
+      "expected_sha256": "a7add6b6a59095a8df97bab4173c5bf9dd4a31c025be1e16d6b6d7a6f7ced981"
+    },
+    {
+      "id": "nsw_transactions_2026",
+      "group": "nsw",
+      "state": "NSW",
+      "format": "zip",
+      "date_policy": "zip_member_month",
+      "date": "2026",
+      "kind": "flow",
+      "grain": "aggregate_cell",
+      "measure_col": "COUNT",
+      "geography_role": "customer_address_lga",
+      "geography_col": "CUSTOMER ADDRESS LGA",
+      "scope": "registration_transactions_not_register_stock",
+      "fields": {
+        "transaction_type": "VEHICLE REGISTRATION TRANSACTION TYPE",
+        "make": "MANUFACTURER",
+        "fuel": "FUEL TYPE",
+        "colour": "COLOUR",
+        "transfer_type": "TRANSFER TYPE"
+      },
+      "headers": [
+        "VEHICLE REGISTRATION TRANSACTION TYPE",
+        "CUSTOMER TYPE",
+        "MANUFACTURER",
+        "FUEL TYPE",
+        "COLOUR",
+        "TRANSFER TYPE",
+        "GENDER",
+        "AGE GROUP",
+        "CUSTOMER ADDRESS LGA",
+        "COUNT"
+      ],
+      "tier": "flow_only",
+      "expected_sha256": "96b94ba336042a0c7025c50623f99a10e253db9a859a0f16c6a2f089185940fe"
+    },
+    {
+      "id_prefix": "sa_registered_postcode_2026__",
+      "group": "sa",
+      "state": "SA",
+      "format": "csv",
+      "date_policy": "fixed",
+      "date": "2026-06-30",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "Count of Vehicle ROIDs",
+      "geography_role": "owner_postcode",
+      "geography_col": "Owner PostCode",
+      "scope": "sa_owner_postcode_includes_trailers_and_interstate_owner_postcodes",
+      "fields": {
+        "make": "Vehicle Make",
+        "vehicle_type": "Vehicle Body Type",
+        "year": "Vehicle Year of Manufacture",
+        "cylinders": "Vehicle Number of Cylinders"
+      },
+      "headers": [
+        "Owner PostCode",
+        "Vehicle Make",
+        "Vehicle Body Type",
+        "Vehicle Number of Cylinders",
+        "Vehicle Year of Manufacture",
+        "Count of Vehicle ROIDs",
+        "Total(TOTAL_VEHICLES)"
+      ],
+      "tier": "candidate_state_support",
+      "auxiliary_total_col": "Total(TOTAL_VEHICLES)",
+      "expected_sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235"
+    },
+    {
+      "id": "sa_original_2026_mirror",
+      "group": "sa_mirror",
+      "state": "SA",
+      "format": "csv",
+      "date_policy": "fixed",
+      "date": "2026-06-30",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "Count of Vehicle ROIDs",
+      "geography_role": "owner_postcode",
+      "geography_col": "Owner PostCode",
+      "scope": "same_source_as_sa_official_mirror_never_add_twice",
+      "fields": {
+        "make": "Vehicle Make",
+        "vehicle_type": "Vehicle Body Type",
+        "year": "Vehicle Year of Manufacture",
+        "cylinders": "Vehicle Number of Cylinders"
+      },
+      "headers": [
+        "Owner PostCode",
+        "Vehicle Make",
+        "Vehicle Body Type",
+        "Vehicle Number of Cylinders",
+        "Vehicle Year of Manufacture",
+        "Count of Vehicle ROIDs",
+        "Total(TOTAL_VEHICLES)"
+      ],
+      "tier": "fallback_only",
+      "auxiliary_total_col": "Total(TOTAL_VEHICLES)",
+      "expected_sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235"
+    },
+    {
+      "id": "act_make_model_suburb",
+      "group": "act",
+      "state": "ACT",
+      "format": "csv",
+      "date_policy": "column_date",
+      "date": "unknown_until_parsed",
+      "kind": "stock",
+      "grain": "aggregate_cell",
+      "measure_col": "Count",
+      "geography_role": "published_suburb_role_unverified",
+      "geography_col": "Suburb",
+      "scope": "act_report_includes_trailers_motorcycles_and_suppressed_counts_le10",
+      "fields": {
+        "make": "Make",
+        "model": "Model",
+        "emissions_category": "Emissions Category"
+      },
+      "headers": [
+        "Data as at",
+        "Suburb",
+        "Make",
+        "Model",
+        "Emissions Category",
+        "Count"
+      ],
+      "tier": "censored_stock_support",
+      "date_col": "Data as at",
+      "manual_sha256": "6c74e748699ceb61c9a9b69f9bb4a7e5ce012307cbdd3db1525de9b29eab7a2d",
+      "manual_filename": "act-make-model-suburb-manual.csv",
+      "expected_sha256": "6c74e748699ceb61c9a9b69f9bb4a7e5ce012307cbdd3db1525de9b29eab7a2d"
+    },
+    {
+      "id_prefix": "qld_registration_2022__",
+      "group": "qld",
+      "state": "Qld",
+      "format": "csv",
+      "date_policy": "fixed",
+      "date": "2022-10-10",
+      "kind": "stock",
+      "grain": "grain_unverified_possible_vehicle_level",
+      "measure_col": null,
+      "geography_role": "publisher_specific_under_review",
+      "geography_col": null,
+      "scope": "qld_historical_registration_2022_not_current_stock",
+      "fields": {},
+      "headers": null,
+      "tier": "historical_support_not_counted"
+    },
+    {
+      "id_prefix": "qld_new_transferred_2026__",
+      "group": "qld_flows",
+      "state": "Qld",
+      "format": "csv",
+      "date_policy": "year_only",
+      "date": "2026",
+      "kind": "flow",
+      "grain": "grain_unverified",
+      "measure_col": null,
+      "geography_role": "publisher_specific_under_review",
+      "geography_col": null,
+      "scope": "qld_new_transferred_2026_transaction_flows_not_stock",
+      "fields": {},
+      "headers": null,
+      "tier": "flow_only"
+    }
+  ],
+  "missing_jurisdiction_policy": {
+    "WA": "BITRE January 2026 only; no separate verified granular local stock file",
+    "Tas": "BITRE January 2026 only; no separate verified granular local stock file",
+    "NT": "BITRE January 2026 only; no separate verified granular local stock file"
+  }
+}

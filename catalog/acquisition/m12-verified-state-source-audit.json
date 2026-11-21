@@ -1,0 +1,70 @@
+{
+  "version": "0.1.0",
+  "evidence": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44851127041",
+  "audited_at": "2026-11-21",
+  "bitre_national_reference": 22771150,
+  "source_profiles": [
+    {
+      "id": "vic_postcode_q3_2026",
+      "sha256": "085843370244ffc3b956e82564edd62bbc0ebd5dde87932da8c9eab4e73c42ac",
+      "reference_date": "2026-09-30",
+      "bytes": 29258014,
+      "rows": 1165150,
+      "censored_rows": 0,
+      "published_numeric_cell_sum": 6037154,
+      "geography": "garaging_postcode"
+    },
+    {
+      "id": "vic_model_q3_2026",
+      "sha256": "1bce46ee689bc2195649d84e354d9bce18015c6d5daa88f3650dbf85c1594572",
+      "reference_date": "2026-09-30",
+      "bytes": 3488815,
+      "rows": 164709,
+      "censored_rows": 0,
+      "published_numeric_cell_sum": 6037154,
+      "geography": "not_published"
+    },
+    {
+      "id": "sa_registered_postcode_2026__84ab4212-cf51-44c5-90ff-e6ba93c681be",
+      "sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235",
+      "reference_date": "2026-06-30",
+      "bytes": 30643325,
+      "rows": 764731,
+      "censored_rows": 0,
+      "published_numeric_cell_sum": 2076573,
+      "geography": "owner_postcode",
+      "includes_trailers": true
+    },
+    {
+      "id": "nsw_usage_2026",
+      "sha256": "d8c389fd3b88158af0fe17319fbdd6a27726c18a825533692a8a695cdd6782e6",
+      "reference_date": "2026 monthly through October",
+      "bytes": 3464230,
+      "rows": 610635,
+      "members": 10,
+      "censored_rows": 355660,
+      "published_numeric_cell_sum_across_ten_months_not_a_fleet": 74502761,
+      "published_row_sum_lower_across_months": 74502761,
+      "published_row_sum_upper_across_months": 76281061,
+      "geography": "customer_address_lga",
+      "includes_trailers": true,
+      "january_2026": {
+        "rows": 61235,
+        "censored_rows": 35651,
+        "published_row_sum_lower": 7418884,
+        "published_row_sum_upper": 7597139
+      }
+    }
+  ],
+  "validation": {
+    "total_aggregate_rows": 2705225,
+    "full_source_hashes_verified": true,
+    "all_source_headers_verified": true,
+    "vic_q3_2026_same_date_reported_total_delta": 0,
+    "source_errors": 0,
+    "safe_to_equate_to_BItre_registration_fleet": false,
+    "NSW_all_month_rows_may_be_summed_to_unique_stock": false,
+    "QLD_ACT_full_source_parsing_not_included_in_this_remote_evidence": true
+  },
+  "caveat": "Overlapping and differently dated/state-defined aggregates, not individual vehicles or insurer risks. NSW suppressed <=5 cells conservatively bounded per published row only; not a confidence interval for fleet size."
+}
