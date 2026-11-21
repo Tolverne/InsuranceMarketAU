@@ -3,9 +3,6 @@ name: M1.3b full high-dimensional holdout source audit
 # This is an intentionally heavy manual follow-up after the initial evidence
 # run. Do not run automatically on every PR push.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-3b-complete-holdout-audit.yml"
   workflow_dispatch:
 
 permissions:
