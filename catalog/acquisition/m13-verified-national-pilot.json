@@ -1,0 +1,60 @@
+{
+  "version": "0.1.0",
+  "source_release": "BITRE Road vehicles Australia January 2026",
+  "reference_date": "2026-01-31",
+  "run_url": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44860333642",
+  "validation_source": "B26-10",
+  "training_source_ids": [
+    "B26-01",
+    "B26-02",
+    "B26-03"
+  ],
+  "workbook_operational_registered_vehicles": 22771150,
+  "synthetic_joint_cells": 64008,
+  "baseline_heldout_WAPE": 0.22104996474116062,
+  "calibrated_heldout_WAPE": 0.020124400198717248,
+  "calibrated_heldout_published_ge100_WAPE": 0.019052414620086326,
+  "unsupported_holdout_published_groups": 0,
+  "supported_age_cohorts": [
+    {
+      "name": "before_1980",
+      "published_b26_10_cell_sum": 256482,
+      "holdout_WAPE": 0.029467404647743913,
+      "published_cells": 39816
+    },
+    {
+      "name": "before_1990",
+      "published_b26_10_cell_sum": 440805,
+      "holdout_WAPE": 0.04307653708640589,
+      "published_cells": 44856
+    },
+    {
+      "name": "before_2000",
+      "published_b26_10_cell_sum": 1193368,
+      "holdout_WAPE": 0.053509270769583686,
+      "published_cells": 49896
+    }
+  ],
+  "training_margins": [
+    {
+      "id": "B26-01",
+      "WAPE": 0.00006928246012855641
+    },
+    {
+      "id": "B26-02",
+      "WAPE": 0.0000555557234272261
+    },
+    {
+      "id": "B26-03",
+      "WAPE": 0.00002055666434929102
+    }
+  ],
+  "validation_policy": {
+    "strictly_excluded_from_training": "B26-10",
+    "pseudo_independent_holdout_is_true_vehicle_truth": false,
+    "numeric_zero_is_structural_zero": false,
+    "inferred_geography_and_make_model": false,
+    "hard_state_class_balancing_is_model_operational_choice": true,
+    "population_release_created": false
+  }
+}
