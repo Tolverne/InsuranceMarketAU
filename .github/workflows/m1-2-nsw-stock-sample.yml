@@ -1,0 +1,68 @@
+name: M1.2 NSW primary registration ZIP sample
+
+# Real 160 MB NSW official ZIP, multiple monthly/split members. Run once
+# to verify the ingestion contract, then use workflow_dispatch for refresh.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-2-nsw-stock-sample.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  primary-stock-zip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install M1.2
+        run: python -m pip install -e ".[data,dev]"
+      - name: Acquire exact official NSW 2026 snapshot (not NSW age)
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_registrations_2026 --static-only --download
+      - name: Extract national reference control
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import find_workbook,extract_workbook_controls,write_controls
+          write_controls(extract_workbook_controls(find_workbook()),Path("data/processed/m1/controls"))
+          PY
+      - name: Stage a few real rows from every monthly source ZIP member
+        run: |
+          python scripts/m12_harmonise.py --groups nsw --only-source nsw_registrations_2026 --sample-rows 20 --parquet --strict
+      - name: Assert 30 split members grouped into 10 months with source roles intact
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          report=json.loads(Path('data/reports/m12/source-profile-sample.json').read_text())
+          assert not report['source_failures']
+          s=report['source_profiles'][0]
+          assert s['source_id']=='nsw_registrations_2026'
+          assert s['source_members']==30
+          assert len(s['observed_dates'])==10
+          assert '2026-01-31' in s['observed_dates']
+          assert '2026-10-31' in s['observed_dates']
+          assert s['censored_rows']>0
+          assert s['geography_role']=='customer_address_lga'
+          assert s['alignment_to_bitre']['direct_count_difference_computed'] is False
+          assert pq.read_metadata(s['parquet_file']).num_rows==s['source_rows']
+          print('M12_NSW_PRIMARY_SAMPLE_OK','source_members',s['source_members'],
+                'periods',len(s['observed_dates']),
+                'profiled_rows',s['source_rows'],'censored',s['censored_rows'])
+          PY
+      - name: Retain source verification metadata only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m12-nsw-registration-sample-${{ github.run_id }}
+          path: data/reports/m12/source-profile-sample.json
+          if-no-files-found: ignore
+          retention-days: 14
