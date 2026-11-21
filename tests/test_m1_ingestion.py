@@ -125,3 +125,12 @@ def test_total_categories_excluded_from_leaf_counts(tmp_path: Path) -> None:
     assert p["published_total_rows"] == 1
     assert p["published_total_numeric_total"] == 11
     assert len(p["state_vehicle_type_controls"]) == 1
+
+
+def test_physical_header_drift_rejected(tmp_path: Path) -> None:
+    f = tmp_path / "drift.csv"
+    f.write_text("vehicle_type,no_vehicles\nPassenger,5\n", encoding="utf-8")
+    resource = _resource(f, "B26-04", ["vehicle_type"])
+    resource["expected_headers"] = ["vehicle_type", "registered_postcode", "no_vehicles"]
+    with pytest.raises(ValueError, match="physical header drift"):
+        profile_projection(f, resource)

@@ -48,15 +48,24 @@ def sha256_file(path: Path) -> str:
 def load_bitre_catalog(root: Path = ROOT) -> list[dict[str, Any]]:
     acquired = json.loads((root / "catalog/acquisition/bitre-2026-acquired-metadata.json").read_text(encoding="utf-8"))
     projections = json.loads((root / "catalog/feasibility/bitre_2026_projections.json").read_text(encoding="utf-8"))
+    observed = json.loads((root / "catalog/acquisition/bitre-2026-physical-schemas.json").read_text(encoding="utf-8"))
+    physical = {entry["projection_id"]: entry for entry in observed["projection_schemas"]}
     items = {entry["projection_id"]: entry for entry in acquired["resources"]}
     definitions = {entry["projection_id"]: entry for entry in projections["observations"]}
-    if len(items) != 18 or len(definitions) != 17:
+    if len(items) != 18 or len(definitions) != 17 or len(physical) != 17:
         raise ValueError("BITRE inventory must contain 17 cross-tabs and explanatory notes")
     output = []
     for pid, definition in sorted(definitions.items()):
         item = items[pid]
+        layout = physical[pid]
+        if item["sha256"] != layout["sha256"] or item["resource_id"] != layout["resource_id"]:
+            raise ValueError(f"Physical schema is tied to a different source release: {pid}")
         output.append({**item, "expected_dimensions": definition["dimensions"],
-                       "postcode_role": definition["postcode_role"]})
+                       "postcode_role": definition["postcode_role"],
+                       "expected_headers": layout["headers"],
+                       "expected_rows": layout["rows"],
+                       "expected_detail_numeric_total": layout["detail_numeric_total"],
+                       "expected_published_total_rows": layout["published_total_rows"]})
     return output
 
 
@@ -176,6 +185,9 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
             if not headers:
                 raise ValueError(f"{path.name} has no column header")
             stats["headers"] = headers
+            if resource.get("expected_headers") is not None and headers != resource["expected_headers"]:
+                raise ValueError(f"{path.name}: physical header drift: {headers} != expected {resource['expected_headers']}")
+            stats["physical_schema_contract_verified"] = resource.get("expected_headers") is not None
             cols = {_normalise_header(x): x for x in headers}
             count_col = next((cols[x] for x in COUNT_HEADERS if x in cols), None)
             if count_col is None:
@@ -246,6 +258,14 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                 writer.close()
                 writer = None
                 os.replace(tmp_path, parquet_path)
+        if resource.get("expected_rows") is not None and stats["rows"] != resource["expected_rows"]:
+            raise ValueError(f"{path.name}: observed rows {stats['rows']} differ from pinned release {resource['expected_rows']}")
+        if (resource.get("expected_detail_numeric_total") is not None
+                and stats["detail_numeric_total"] != resource["expected_detail_numeric_total"]):
+            raise ValueError(f"{path.name}: detail count mismatch against pinned release")
+        if (resource.get("expected_published_total_rows") is not None
+                and stats["published_total_rows"] != resource["expected_published_total_rows"]):
+            raise ValueError(f"{path.name}: published grand-total row count mismatch against pinned release")
         if pairs:
             stats["state_vehicle_type_controls"] = {
                 key: {"sum_numeric": nums[0], "suppressed_cells": nums[1]}
