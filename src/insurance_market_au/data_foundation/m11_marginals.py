@@ -96,7 +96,8 @@ def aggregate_source_marginals(
     parquet = pq.ParquetFile(path)
     if parquet.metadata.num_rows != source["expected_rows"]:
         raise ValueError(f"{source['projection_id']} staging row-count differs from verified physical contract")
-    required = {"vehicle_count", "is_published_total", "projection_id", "source_release_id", "count_status"}
+    required = {"vehicle_count", "is_published_total", "projection_id",
+                "source_release_id", "count_status", "observation_date", "source_row"}
     active = available_margins(source["expected_headers"])
     fields = set(required)
     for margin in active:
@@ -122,6 +123,10 @@ def aggregate_source_marginals(
         }
         for i in range(batch.num_rows):
             total_rows += 1
+            if columns["observation_date"][i] != REFERENCE_DATE:
+                raise ValueError(f"{path.name}: reference date drift at row {total_rows}")
+            if columns["source_row"][i] != total_rows:
+                raise ValueError(f"{path.name}: staging source row order/sequence drift at row {total_rows}")
             if columns["projection_id"][i] != source["projection_id"]:
                 raise ValueError(f"{path.name}: projection_id drift at row {total_rows}")
             if columns["source_release_id"][i] != lineage:
@@ -130,6 +135,9 @@ def aggregate_source_marginals(
                 excluded_total_rows += 1
                 continue
             count = columns["vehicle_count"][i]
+            status = columns["count_status"][i]
+            if (count is None) == (status == "published_confidentialised_numeric"):
+                raise ValueError(f"{path.name}: inconsistent count/status at row {total_rows}")
             if count is None:
                 detail_non_numeric += 1
             elif not isinstance(count, int) or count < 0:

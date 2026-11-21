@@ -40,6 +40,8 @@ Comparisons report signed/absolute residuals, median/95th-percentile/max differe
 
 **Important disclosure semantics:** the original BITRE explanatory notes describe suppression of counts fewer than 3 and secondary perturbation/suppression. Numeric zero can be a disclosure-adjusted number, **not proof of a structural zero**. Missing groups are not treated as zeros, unknown count tokens are not imputed, and no unjustified statistical error interval or cell-level hard tolerance is invented.
 
+The [versioned M1.1 constraint policy](../../catalog/constraints/bitre-2026-m11-policy.json) makes these treatment decisions machine-readable and explicitly leaves statistical hard/soft approvals unresolved. The staged Parquet auditor verifies source release, reference date, source-row sequence, source count/status consistency and the M1.0 physical row/count contract before comparing margins.
+
 The workbook's national total is the highest-priority published accounting anchor. State/class counts are published benchmarks to be respected with explicit consistency decisions. Fine-grained projected counts remain soft or interval-candidate constraints until a documented likelihood/confidentialisation model is developed.
 
 ## Run locally (after PR merge)

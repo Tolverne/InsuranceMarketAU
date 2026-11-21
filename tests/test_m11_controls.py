@@ -170,3 +170,27 @@ def test_source_marginal_parquet_lineage_and_total_exclusion(tmp_path: Path) -> 
     meta["resource_id"] = "other"
     with pytest.raises(ValueError, match="source release lineage"):
         aggregate_source_marginals(path, meta, batch_size=2)
+
+
+def test_parquet_reference_date_drift_fails(tmp_path: Path) -> None:
+    pa = pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+    from insurance_market_au.data_foundation.m1 import _schema
+    meta = {
+        "projection_id": "B26-03", "resource_id": "source", "sha256": "a" * 64,
+        "expected_rows": 1, "expected_published_total_rows": 0,
+        "expected_detail_numeric_total": 7,
+        "expected_headers": ["vehicle_type", "state_abb", "no_vehicles"],
+    }
+    row = {
+        "source_release_id": "bitre-2026:source:aaaaaaaaaaaa",
+        "projection_id": "B26-03", "source_row": 1,
+        "observation_date": "2025-01-31",
+        "count_status": "published_confidentialised_numeric",
+        "vehicle_count": 7, "is_published_total": False,
+        "vehicle_type": "Passenger vehicles", "registered_state": "NSW",
+    }
+    f = tmp_path / "source.parquet"
+    pq.write_table(pa.Table.from_pylist([row], schema=_schema()), f)
+    with pytest.raises(ValueError, match="reference date drift"):
+        aggregate_source_marginals(f, meta)
