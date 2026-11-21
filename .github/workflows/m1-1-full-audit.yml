@@ -3,9 +3,6 @@ name: M1.1 full 17-source national BITRE audit
 # Large read-only evidence run. Subsequent full runs should be started by
 # workflow_dispatch rather than repeated on every normal code change.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-1-full-audit.yml"
   workflow_dispatch:
 
 permissions:
