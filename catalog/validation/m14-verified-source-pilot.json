@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "milestone": "M1.4a",
+  "reference_date": "2026-01-31",
+  "run_url": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44874258572",
+  "published_vehicle_control": 22771150,
+  "source": {
+    "holdout_projection_id": "B26-14",
+    "sha256": "d82e75697a7435d3c2ea5d1e3d37ea5a615016b7a67225eb417c339e16699f30",
+    "original_published_cell_count_threshold": 100,
+    "published_detail_rows_excluding_totals": 93899,
+    "eligible_published_reference_cells": 14273,
+    "excluded_below_threshold_rows": 79626,
+    "independently_published_confidentialised_not_microdata_truth": true
+  },
+  "baseline": {
+    "seed": 42,
+    "synthetic_rows": 85000,
+    "source_published_cell_WAPE": 0.5397758396885619,
+    "source_key_coverage": 0.4325649828347229,
+    "before_1980_published_cell_WAPE": 0.9723540483676563,
+    "source_published_mass_on_included_cells": 21812539,
+    "model_expected_mass_on_same_cells": 18114380.709398165,
+    "fourway_support_cells": 64008,
+    "maximum_original_fourway_expected_mass_error": 1.1932570487260818e-9,
+    "effective_synthetic_sample_size": 22860.311895064075
+  },
+  "seed_size_study": {
+    "seeds": [
+      17,
+      53
+    ],
+    "study": [
+      {
+        "sample_rows": 85000,
+        "mean_B26_14_WAPE": 0.5344556015076197,
+        "seed_SD_B26_14_WAPE": 0.0003167147557536776,
+        "mean_source_key_coverage": 0.4287816156379177,
+        "mean_before_1980_WAPE": 0.991682434885564,
+        "seed_SD_before_1980_WAPE": 0.008805464819837239
+      },
+      {
+        "sample_rows": 120000,
+        "mean_B26_14_WAPE": 0.4128423443591371,
+        "seed_SD_B26_14_WAPE": 0.0019030054329459145,
+        "mean_source_key_coverage": 0.6049884397113431,
+        "mean_before_1980_WAPE": 0.6910468998938539,
+        "seed_SD_before_1980_WAPE": 0.007205391545865358
+      }
+    ],
+    "across_seed_SD_only_Monte_Carlo_variation": true,
+    "study_does_not_estimate_structural_model_uncertainty": true
+  },
+  "release_review": {
+    "source_integrity_and_fourway_invariants_passed": true,
+    "heldout_error_acceptance_threshold_approved": false,
+    "full_make_model_postcode_estimates_released_for_pricing": false,
+    "commercial_population_release_created": false,
+    "required_next_milestone": "M1.4b conditioning and soft-marginal calibration after diagnostics"
+  }
+}
