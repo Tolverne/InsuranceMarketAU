@@ -1,0 +1,55 @@
+name: M1.2 state source physical schema evidence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-2-source-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch primary state samples
+        run: |
+          python scripts/download_vehicle_sources.py --groups vic --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_usage_2026 --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_transactions_2026 --static-only --download
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_heavy_2026 --static-only --download
+          python scripts/download_vehicle_sources.py --groups sa --download
+          python scripts/download_vehicle_sources.py --groups qld,qld_flows --list
+      - name: Describe actual physical headers and month slices (no raw uploads)
+        run: |
+          python - <<'PY'
+          import csv, json, pathlib, zipfile, collections, re
+          root=pathlib.Path('data/raw')
+          for path in sorted(root.rglob('*')):
+              if path.is_file() and path.suffix.lower()=='.csv':
+                  print("M12_FILE",str(path.relative_to(root)),path.stat().st_size)
+                  with path.open('r',encoding='utf-8-sig',errors='replace',newline='') as f:
+                      reader=csv.reader(f)
+                      for i,row in zip(range(4),reader):
+                          print('M12_CSV_ROW',i,repr(row)[:1000])
+              elif path.is_file() and path.suffix.lower()=='.zip':
+                  print("M12_ZIP",str(path.relative_to(root)),path.stat().st_size)
+                  with zipfile.ZipFile(path) as archive:
+                      members=[x for x in archive.infolist() if x.filename.lower().endswith(('.csv','.txt'))]
+                      print("M12_ZIP_MEMBERS",len(members))
+                      for member in members[:3]+(members[-2:] if len(members)>3 else []):
+                          with archive.open(member) as fp:
+                              lines=[fp.readline().decode('utf-8-sig','replace').strip()[:700] for _ in range(3)]
+                          print("M12_MEMBER",member.filename,member.file_size,repr(lines)[:1500])
+          for p in pathlib.Path('data/reports').glob('acquisition-*.json'):
+              o=json.loads(p.read_text())
+              if any(g in ('qld','qld_flows') for g in o.get('groups', [])):
+                  for item in o.get('resources', []):
+                      print('M12_Q_RESOURCE',json.dumps({k:item.get(k) for k in ('id','title','url','format','group','status','bytes')},ensure_ascii=False)[:900])
+          PY
