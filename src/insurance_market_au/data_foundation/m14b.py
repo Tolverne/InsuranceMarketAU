@@ -392,3 +392,128 @@ def calibrate(root: Path = ROOT, *, rounds: int = 4,
     }
     _atomic_json(manifest_path,report)
     return report
+
+
+def compare_withheld_projections(
+    root: Path = ROOT, *,
+    threshold: int = 100,
+    source_ids: tuple[str, ...] = ("B26-14", "B26-16", "B26-17"),
+    report_path: Path | None = None,
+) -> dict:
+    """Same-row paired comparison of baseline vs candidate on reserved sources.
+
+    This is a DIAGNOSTIC after fitting, never part of optimiser targets or
+    parameter selection. Published counts are disclosure-adjusted, not truth.
+    """
+    from collections import defaultdict
+    from insurance_market_au.data_foundation.m1 import load_bitre_catalog
+    from insurance_market_au.data_foundation.m13b import _source_rows
+
+    if threshold < 100:
+        raise ValueError("Withheld source diagnostics require originally published counts >=100")
+    if not source_ids or any(x not in HOLDOUT_SPECS for x in source_ids):
+        raise ValueError("Only three reserved withheld projections may enter evaluation")
+    source_path=root/PATH_ROWS
+    candidate_path=root/PATH_CALIBRATED
+    calib_path=root/PATH_REPORT_CALIBRATED
+    if not source_path.is_file() or not candidate_path.is_file() or not calib_path.is_file():
+        raise FileNotFoundError("Fit M1.4b candidate before withheld-source comparison")
+    meta=json.loads(calib_path.read_text(encoding="utf-8"))
+    if (meta["pipeline"]!=VERSION or meta["original_m13b_sha256"]!=sha256_file(source_path)
+        or meta["calibrated_sample_sha256"]!=sha256_file(candidate_path)):
+        raise ValueError("Cannot compare a stale calibration candidate against a different baseline")
+
+    _,pq=_require_pyarrow()
+    baseline=pq.read_table(source_path)
+    calibrated=pq.read_table(candidate_path)
+    if baseline.num_rows != calibrated.num_rows or baseline.schema!=calibrated.schema:
+        raise ValueError("Calibration must change weights only, never source schema or rows")
+    bw=np.array(baseline["expected_vehicle_weight"].to_pylist(),dtype=float)
+    cw=np.array(calibrated["expected_vehicle_weight"].to_pylist(),dtype=float)
+    for field in baseline.column_names:
+        if field != "expected_vehicle_weight" and not baseline[field].equals(calibrated[field]):
+            raise ValueError(f"Calibration modified synthetic attribute {field}")
+    if abs(bw.sum()-TOTAL)>0.1 or abs(cw.sum()-TOTAL)>0.1:
+        raise ValueError("National accounting control drift during evaluation")
+    data=baseline.to_pydict()
+    published_catalogue={x["projection_id"]:x for x in load_bitre_catalog(root)}
+    reports=[]
+    for pid in source_ids:
+        print(f"[M1.4b] Evaluating strictly withheld publisher projection {pid}",flush=True)
+        dims=HOLDOUT_SPECS[pid]
+        original=defaultdict(float)
+        adjusted=defaultdict(float)
+        for i in range(len(bw)):
+            key=tuple(data[f][i] for f in dims)
+            original[key]+=bw[i]
+            adjusted[key]+=cw[i]
+        published_count=0
+        published_mass=0.0
+        loss_before=0.0
+        loss_after=0.0
+        supported=0
+        historic={"before_1980":[0,0.0,0.0,0.0],"before_1990":[0,0.0,0.0,0.0],
+                  "before_2000":[0,0.0,0.0,0.0]}
+        for batch in _source_rows(published_catalogue[pid],dims,root=root):
+            for key,mass in batch:
+                if mass < threshold:
+                    continue
+                published_count+=1
+                published_mass+=mass
+                pred1=original.get(key,0.0)
+                pred2=adjusted.get(key,0.0)
+                supported+=int(key in original)
+                loss_before+=abs(pred1-mass)
+                loss_after+=abs(pred2-mass)
+                if "manufacture_year" in dims:
+                    y=key[dims.index("manufacture_year")]
+                    if isinstance(y,str) and len(y)==4 and y.isdecimal():
+                        for cutoff in (1980,1990,2000):
+                            if int(y)<cutoff:
+                                age=historic[f"before_{cutoff}"]
+                                age[0]+=1
+                                age[1]+=mass
+                                age[2]+=abs(pred1-mass)
+                                age[3]+=abs(pred2-mass)
+        reports.append({
+            "projection_id":pid,
+            "sha256":published_catalogue[pid]["sha256"],
+            "dimensions":list(dims),
+            "published_cell_threshold":threshold,
+            "published_cells_compared":published_count,
+            "published_mass_on_comparison_cells":published_mass,
+            "comparison_cells_with_sample_support":supported,
+            "fraction_comparison_cells_with_sample_support":(
+                supported/published_count if published_count else None
+            ),
+            "baseline_published_cell_WAPE":loss_before/published_mass if published_mass else None,
+            "candidate_published_cell_WAPE":loss_after/published_mass if published_mass else None,
+            "delta_candidate_minus_baseline_WAPE":(
+                (loss_after-loss_before)/published_mass if published_mass else None
+            ),
+            "historic_cohorts":{
+                k:{
+                    "published_cells":v[0],
+                    "published_count_sum":v[1],
+                    "baseline_WAPE":v[2]/v[1] if v[1] else None,
+                    "candidate_WAPE":v[3]/v[1] if v[1] else None,
+                } for k,v in historic.items()
+            },
+            "zero_sample_support_not_structural_zero":True,
+            "holdout_never_used_for_fit":True,
+            "not_real_vehicle_record_validation":True,
+        })
+    result={
+        "pipeline":VERSION,
+        "status":"paired_withheld_published_projection_comparison_not_calibration_input",
+        "baseline_sample_sha256":meta["original_m13b_sha256"],
+        "candidate_sample_sha256":meta["calibrated_sample_sha256"],
+        "training_source_ids":list(ORDER),
+        "independently_reserved_holdouts":list(source_ids),
+        "comparison":reports,
+        "holdout_not_used_for_hyperparameter_selection":True,
+        "automatic_population_promotion":False,
+        "interpretation":"Same synthetic support and seed; only weights differ. Error is against published perturbed aggregate cells, not original vehicles.",
+    }
+    _atomic_json(report_path or root/"data/reports/m14b/heldout-comparison.json",result)
+    return result
