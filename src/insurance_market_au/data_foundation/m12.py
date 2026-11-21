@@ -153,6 +153,43 @@ def select_sources(root: Path, cfg: dict, groups: set[str]) -> tuple[list[dict],
     return selected,warnings
 
 
+MIN_DYNAMIC_SOURCES={"qld":9,"qld_flows":2}
+
+
+def source_inventory_warnings(cfg: dict, selected: list[dict],
+                              groups: set[str], only_source: str | None) -> list[dict]:
+    """Make incompleteness explicit without turning a sampled pilot into failure."""
+    if only_source:
+        return []
+    actual={x["source_id"] for x in selected}
+    missing=[]
+    for spec in cfg["sources"]:
+        gid=spec["group"]
+        if gid not in groups or spec["tier"] in {"quarantined","fallback_only"}:
+            continue
+        sid=spec.get("id")
+        if sid and sid not in actual:
+            missing.append({
+                "source_id":sid,
+                "status":"requested_source_missing",
+                "detail":"Dataset not selected from successful local acquisition; do not treat jurisdictional evidence as complete"
+            })
+        prefix=spec.get("id_prefix")
+        if prefix and gid not in MIN_DYNAMIC_SOURCES and not any(x.startswith(prefix) for x in actual):
+            if not (gid=="sa" and "sa_original_2026_mirror" in actual):
+                missing.append({"source_id":prefix,"status":"requested_source_missing",
+                                "detail":"No downloaded official source matched this publisher dataset"})
+    for group,minimum in MIN_DYNAMIC_SOURCES.items():
+        if group not in groups:
+            continue
+        n=sum(x["spec"]["group"]==group for x in selected)
+        if n<minimum:
+            missing.append({"source_id":group,"status":"expected_source_parts_missing",
+                            "expected_at_least":minimum,"observed":n,
+                            "detail":"Publisher original 2026-11-21 resource manifest had this many distinct parts"})
+    return missing
+
+
 def count_token(value: str | None, measure_col: str | None) -> dict[str, Any]:
     if measure_col is None:
         return {"status":"unverified_grain_no_count_inferred","count":None,
@@ -618,6 +655,8 @@ def run_m12(*,root:Path=ROOT,groups:set[str] | None=None,parquet:bool=False,
         sources=[x for x in sources if only_source in x["source_id"]]
         if not sources:
             raise ValueError(f"No acquired source matching {only_source!r}")
+    inventory_missing=source_inventory_warnings(cfg,sources,groups,only_source)
+    warnings.extend(inventory_missing)
     profiles=[]
     failures=[]
     for idx,item in enumerate(sources,1):
@@ -639,6 +678,8 @@ def run_m12(*,root:Path=ROOT,groups:set[str] | None=None,parquet:bool=False,
         "bitre_reference_date":REFERENCE_DATE,
         "bitre_state_controls":controls,
         "sources_discovered_for_selected_groups":len(sources),
+        "source_inventory_complete":not bool(inventory_missing) and only_source is None,
+        "source_inventory_requested_subset":only_source is not None,
         "source_profiles":profiles,
         "source_failures":failures,
         "notices":warnings,

@@ -240,3 +240,16 @@ def test_two_vic_projections_can_reconcile_totals_without_row_join(tmp_path:Path
     assert r["within_publisher_checks"][0]["not_a_vehicle_row_join"]
     pilot=run_m12(root=tmp_path,groups={"vic"},limit_rows=1,fail_on_error=True)
     assert pilot["within_publisher_checks"][0]["status"]=="not_evaluated_partial_sample"
+
+
+def test_requested_but_missing_source_not_silently_complete(tmp_path:Path):
+    root_fixture(tmp_path)
+    sid="vic_model_q3_2026"
+    acquired(tmp_path,sid,"vic","2026-09-30",
+             b"CD_MAKE_VEH1,CD_MODEL_VEH,CD_CLR_BDY_VEH_P,TOTAL1\nA,B,C,2\n")
+    result=run_m12(root=tmp_path,groups={"vic"},fail_on_error=True)
+    assert result["source_inventory_complete"] is False
+    assert any(x["source_id"]=="vic_postcode_q3_2026"
+               and x["status"]=="requested_source_missing" for x in result["notices"])
+    pilot=run_m12(root=tmp_path,groups={"vic"},only_source=sid,fail_on_error=True)
+    assert pilot["source_inventory_requested_subset"]
