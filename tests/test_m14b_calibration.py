@@ -146,3 +146,23 @@ def test_rejects_incorrect_calibration_and_accidental_overwrite(tmp_path, monkey
         m14b.calibrate(tmp_path,output_path=baseline)
     with pytest.raises(ValueError,match="overwrit"):
         m14b.calibrate(tmp_path,report_path=tmp_path/m13b.PATH_REPORT)
+
+
+def test_predeclared_governance_policy_matches_training_only_code():
+    from insurance_market_au.data_foundation.m1 import ROOT
+    policy=json.loads(
+        (ROOT/"catalog/calibration/m14b-policy.json").read_text(encoding="utf-8")
+    )
+    settings=policy["predeclared_hyperparameters"]
+    assert policy["model_version"]==m14b.VERSION
+    assert policy["training_projection_order"]==list(m14b.ORDER)
+    assert policy["strictly_heldout_projections"]==list(m13b.HOLDOUT_SPECS)
+    assert settings["rounds"]==4
+    assert settings["relaxation"]==pytest.approx(0.35)
+    assert settings["update_cap"]==pytest.approx(1.6)
+    assert settings["relative_weight_cap_before_projection"]==pytest.approx(8)
+    assert settings["minimum_published_training_cell"]==10
+    assert settings["minimum_publisher_scope"]==100
+    assert settings["minimum_source_mass_coverage"]==pytest.approx(0.15)
+    assert policy["release_gate"]["commercial_synthetic_population_approved"] is False
+    assert policy["heldout_policy"]["tune_hyperparameters_to_heldout"] is False
