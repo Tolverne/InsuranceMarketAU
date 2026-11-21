@@ -71,3 +71,11 @@ A source-profile JSON and a separate per-jurisdiction **coverage-matrix.json** a
 6. Unknown QLD record grain, ACT total coverage, crosswalks from VIC/NSW publisher vehicle codes to BITRE class, and licensing require formal review before source-weighted synthesis.
 
 M1.3 will choose validated soft constraints and build the sparse national joint distribution with uncertainty and held-out evaluations; do not interpret this M1.2 output as real vehicle-level microdata.
+
+## Independent full-source audit (21 November 2026)
+
+The [official source audit](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44851127041) passed. Its [versioned metadata](../../catalog/acquisition/m12-verified-state-source-audit.json) records 2,705,225 published aggregate observations from the audited Victorian, South Australian and NSW usage files.
+
+Both Victorian Q3 2026 sources independently total 6,037,154; this is a valid publisher-total comparison but **not** a postcode/model joint observation. South Australia 30 June 2026 has 2,076,573 in its published owner-postcode cell sum, including trailers. The NSW usage file has 610,635 published cells across ten 2026 monthly snapshots, including 355,660 censored cells. The January snapshot's conservative published-row count range is 7,418,884–7,597,139, but this **is not** an NSW motor-vehicle fleet confidence interval: the input includes trailers and different source conventions.
+
+The BITRE January 2026 reference counts (Vic 5,795,388; SA 1,664,049; NSW 6,502,052) are different in date and/or scope from these publisher values. Do not interpret subtraction as growth or insurance demand, and never sum NSW monthly snapshots as one stock.
