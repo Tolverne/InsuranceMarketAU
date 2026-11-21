@@ -150,3 +150,60 @@ def test_source_sha_and_physical_header_drift_rejected(tmp_path:Path):
     assert len(r["source_failures"])==1
     assert "SHA drift" in r["source_failures"][0]["error"]
     assert r["source_profiles"]==[]
+
+
+def test_act_manually_downloaded_official_schema_and_dates(tmp_path:Path):
+    pytest.importorskip("pyarrow")
+    cfg=root_fixture(tmp_path)
+    contents=(
+        "Data as at,Suburb,Make,Model,Emissions Category,Count\n"
+        "2026-11-01,Canberra,Toyota,Corolla,Petrol,<=10\n"
+        "2026-11-01,Belconnen,Volvo,XC60,Petrol,25\n"
+    ).encode()
+    digest=hashlib.sha256(contents).hexdigest()
+    spec=match_source(cfg,"act_make_model_suburb")
+    spec["manual_sha256"]=digest
+    (tmp_path/"catalog/harmonization/m12-sources.json").write_text(json.dumps(cfg))
+    folder=tmp_path/"data/raw/act/2026"
+    folder.mkdir(parents=True)
+    (folder/"act-make-model-suburb-manual.csv").write_bytes(contents)
+    r=run_m12(root=tmp_path,groups={"act"},parquet=True,fail_on_error=True)
+    profile=r["source_profiles"][0]
+    assert profile["manual_acquisition"] is True
+    assert profile["source_rows"]==2
+    assert profile["censored_rows"]==1
+    assert profile["observed_dates"]["2026-11-01"]["upper_sum_known"]==35
+    assert profile["geography_role"]=="published_suburb_role_unverified"
+
+
+def test_nsw_transaction_flow_excluded_from_stock(tmp_path:Path):
+    pytest.importorskip("pyarrow")
+    root_fixture(tmp_path)
+    sid="nsw_transactions_2026"
+    head='"VEHICLE REGISTRATION TRANSACTION TYPE"|"CUSTOMER TYPE"|"MANUFACTURER"|"FUEL TYPE"|"COLOUR"|"TRANSFER TYPE"|"GENDER"|"AGE GROUP"|"CUSTOMER ADDRESS LGA"|"COUNT"\n'
+    row='"Establish registration of new vehicle"|"Private"|"Toyota"|"Petrol"|"Blue"|"New"|"N/A"|"N/A"|"Sydney"|"12"\n'
+    stream=BytesIO()
+    with ZipFile(stream,"w") as z:
+        z.writestr("TfNSW_Vehicle_Registration_Transactions_202601_1.csv",head+row)
+    acquired(tmp_path,sid,"nsw","2026",stream.getvalue())
+    r=run_m12(root=tmp_path,groups={"nsw"},only_source=sid,parquet=True,fail_on_error=True)
+    assert r["stock_sources"]==[]
+    assert r["flow_sources_excluded_from_stock"]==[sid]
+    p=r["source_profiles"][0]
+    assert p["alignment_to_bitre"]["date_and_scope_classification"]["2026-01-31"]=="not_comparable_flow_vs_stock"
+    assert "/flow/" in p["parquet_file"].replace("\\","/")
+
+
+def test_sa_mirror_fallback_must_stay_separate(tmp_path:Path):
+    cfg=root_fixture(tmp_path)
+    contents=("Owner PostCode,Vehicle Make,Vehicle Body Type,Vehicle Number of Cylinders,"
+        "Vehicle Year of Manufacture,Count of Vehicle ROIDs,Total(TOTAL_VEHICLES)\n"
+        "5000,TOYOTA,SEDAN,4 Cylinders,2020,7,\n").encode()
+    acquired(tmp_path,"sa_original_2026_mirror","sa_mirror","2026-06-30",contents)
+    selected,warnings=select_sources(tmp_path,cfg,{"sa"})
+    assert len(selected)==1
+    assert selected[0]["source_id"]=="sa_original_2026_mirror"
+    assert any(x["status"]=="third_party_mirror_fallback" for x in warnings)
+    profile=run_m12(root=tmp_path,groups={"sa"})["source_profiles"][0]
+    assert profile["source_rows"]==1
+    assert profile["source_tier"]=="fallback_only"
