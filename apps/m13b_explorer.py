@@ -15,7 +15,11 @@ import pyarrow.parquet as pq
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/processed/m13b/weighted-synthetic-fleet.parquet"
+BASE_SOURCE = ROOT / "data/processed/m13b/weighted-synthetic-fleet.parquet"
+CALIBRATED_SOURCE = ROOT / "data/processed/m14b/calibrated-weighted-fleet.parquet"
+CALIBRATION_REPORT = ROOT / "data/reports/m14b/calibration.json"
+COMPARISON_REPORT = ROOT / "data/reports/m14b/heldout-comparison.json"
+SOURCE = BASE_SOURCE
 REPORT = ROOT / "data/reports/m13b/validation.json"
 st.set_page_config(page_title="InsuranceMarketAU | Synthetic Fleet Explorer", layout="wide")
 st.title("Australian vehicle market — synthetic fleet explorer")
@@ -23,9 +27,49 @@ st.caption(
     "BITRE 31 January 2026 • expected vehicle weights • "
     "state, vehicle type, manufacture year, fuel, make, model and separate postcode roles"
 )
-if not SOURCE.is_file() or not REPORT.is_file():
+if not BASE_SOURCE.is_file() or not REPORT.is_file():
     st.error("No M1.3b sample found. Run: py -3 scripts/m13b_expand.py --rows 220000")
     st.stop()
+
+@st.cache_data(show_spinner=False)
+def file_digest(path: str, mtime: int, size: int) -> str:
+    from insurance_market_au.data_foundation.m1 import sha256_file
+    return sha256_file(Path(path))
+
+calibration_meta = None
+calibration_ready = False
+if CALIBRATED_SOURCE.is_file() and CALIBRATION_REPORT.is_file():
+    try:
+        calibration_meta = json.loads(CALIBRATION_REPORT.read_text(encoding="utf-8"))
+        calibration_ready = (
+            calibration_meta.get("pipeline") == "m14b-soft-conditional-v1"
+            and calibration_meta.get("governance", {}).get("automatic_promotion_to_production") is False
+            and calibration_meta.get("original_m13b_sha256") == file_digest(
+                str(BASE_SOURCE), BASE_SOURCE.stat().st_mtime_ns, BASE_SOURCE.stat().st_size
+            )
+            and calibration_meta.get("calibrated_sample_sha256") == file_digest(
+                str(CALIBRATED_SOURCE), CALIBRATED_SOURCE.stat().st_mtime_ns,
+                CALIBRATED_SOURCE.stat().st_size
+            )
+        )
+    except (OSError, ValueError, KeyError):
+        calibration_ready = False
+
+with st.sidebar:
+    versions = ["M1.3b baseline"]
+    if calibration_ready:
+        versions.append("M1.4b calibrated candidate")
+    version_choice = st.radio("Synthetic model weights", versions, index=0)
+    st.caption(
+        "The calibrated candidate is research-only. "
+        "Every state/class/year/fuel total stays unchanged."
+    )
+SOURCE = CALIBRATED_SOURCE if version_choice == "M1.4b calibrated candidate" else BASE_SOURCE
+if CALIBRATED_SOURCE.exists() and not calibration_ready:
+    st.info(
+        "A calibrated sample exists but is missing its validated provenance or "
+        "refers to an older baseline. Re-run py -3 scripts/m14b_calibrate.py."
+    )
 
 @st.cache_data(show_spinner=False)
 def get_data(src: str, report_path: str, sample_mtime_ns: int, report_mtime_ns: int):
@@ -151,9 +195,9 @@ def chart(frame: pd.DataFrame, dimension: str, *, n: int = 20) -> None:
     st.bar_chart(series, y_label="Weighted synthetic expected vehicles")
 
 
-overview, makes_tab, geography, sample_rows_tab, diagnostic_tab, validation = st.tabs([
+overview, makes_tab, geography, sample_rows_tab, diagnostic_tab, calibration_tab, validation = st.tabs([
     "Overview", "Make and model", "Registered versus garaging geography",
-    "Synthetic sample rows", "Model diagnostics", "Validation and provenance"
+    "Synthetic sample rows", "Model diagnostics", "Calibration comparison", "Validation and provenance"
 ])
 with overview:
     x,y = st.columns(2)
@@ -220,10 +264,82 @@ with sample_rows_tab:
     st.dataframe(selected[cols].head(500), hide_index=True, use_container_width=True)
 
 with diagnostic_tab:
-    # Optional read-only audit: no model fitting or raw source reads occur
-    # in the explorer. All diagnostics are precomputed by m14_validate.py.
+    if SOURCE == CALIBRATED_SOURCE:
+        st.info(
+            "The M1.4a diagnostics below measure the ORIGINAL M1.3b sample, "
+            "not the selected calibrated weights. Open 'Calibration comparison' "
+            "for a paired check against withheld publisher projections."
+        )
+    # Read-only baseline audit; no fit or raw publisher input in Streamlit.
     import runpy
     runpy.run_path(str(ROOT / "apps/m14_validation_panel.py"), run_name="__main__")
+
+with calibration_tab:
+    st.subheader("M1.4b — Original vs calibrated weight candidate")
+    st.caption(
+        "Same synthetic rows and same four-way fleet controls; only expected "
+        "weights differ. Both are exploratory, not registered-vehicle microdata."
+    )
+    if not calibration_ready:
+        st.info(
+            "No current M1.4b candidate yet. Run in PowerShell: "
+            "py -3 scripts/m14b_calibrate.py"
+        )
+    else:
+        before = calibration_meta["calibration"]["training_objectives_before"]
+        after = calibration_meta["calibration"]["training_objectives_after"]
+        a,b,c = st.columns(3)
+        a.metric("Expected national count", f"{calibration_meta['calibrated_expected_mass']:,.0f}")
+        b.metric("Four-way max count difference", f"{calibration_meta['max_fourway_mass_residual']:.7f}")
+        c.metric("Training projections", str(len(calibration_meta["training_source_ids"])))
+        st.subheader("Training-only conditional margin fit")
+        scores = pd.DataFrame([
+            {"Source":x["source_id"],
+             "Before error":x["within_scope_comparable_conditional_MAE_fraction"],
+             "After error":y["within_scope_comparable_conditional_MAE_fraction"],
+             "Eligible publisher scopes":x["eligible_scopes"],
+             "Published scope mass represented":x["published_scope_mass_fraction_on_sample_support"]}
+            for x,y in zip(before,after)
+        ])
+        st.dataframe(scores, hide_index=True, use_container_width=True)
+        if not scores.empty:
+            st.bar_chart(scores.set_index("Source")[["Before error","After error"]])
+        st.caption(
+            "Training-error metric is conditional absolute difference on "
+            "supported published keys, NOT heldout WAPE and NOT a true-model "
+            "confidence interval. No new synthetic make/model/postcode "
+            "combinations are created by this weight-only calibration."
+        )
+        if COMPARISON_REPORT.is_file():
+            comparison = json.loads(COMPARISON_REPORT.read_text(encoding="utf-8"))
+            if (comparison.get("pipeline") == "m14b-soft-conditional-v1"
+                and comparison.get("baseline_sample_sha256") == calibration_meta["original_m13b_sha256"]
+                and comparison.get("candidate_sample_sha256") == calibration_meta["calibrated_sample_sha256"]):
+                st.subheader("Independent published holdout comparisons")
+                st.warning(
+                    "B26-14/16/17 were NOT training data. Results are errors "
+                    "against disclosure-adjusted published aggregate cells, "
+                    "not vehicle-level truth or an approved release.",
+                    icon="⚠️",
+                )
+                checks = pd.DataFrame([
+                    {"Held-out projection":x["projection_id"],
+                     "Published cells >=100":x["published_cells_compared"],
+                     "Baseline WAPE":x["baseline_published_cell_WAPE"],
+                     "Candidate WAPE":x["candidate_published_cell_WAPE"],
+                     "Candidate minus baseline":x["delta_candidate_minus_baseline_WAPE"],
+                     "Published-cell sample coverage":x["fraction_comparison_cells_with_sample_support"]}
+                    for x in comparison["comparison"]
+                ])
+                st.dataframe(checks, hide_index=True, use_container_width=True)
+            else:
+                st.info("Withheld-source comparison is stale; run py -3 scripts/m14b_calibrate.py --validate-only.")
+        else:
+            st.info(
+                "To compare both versions against B26-14/16/17, run: "
+                "py -3 scripts/m14b_calibrate.py --validate-only"
+            )
+        st.caption("No calibrated weights are promoted automatically into pricing, demand or a released population.")
 
 with validation:
     st.subheader("Model provenance and calibration")
