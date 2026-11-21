@@ -1,0 +1,116 @@
+name: M1.4b real BITRE soft calibration and three independent holdouts
+
+# Heavy one-off PR source audit; subsequent runs should use workflow_dispatch.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-4b-real-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-source-training-and-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install data/model/regression requirements
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Test source-holdout firewall, exact weighted controls and deterministic fit
+        run: python -m pytest -q tests/test_m14b_calibration.py tests/test_m14_diagnostics.py tests/test_m13b_conditional.py
+      - name: Download pinned publisher workbook plus 15 source projections
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python - <<'PY'
+          import json,subprocess,sys
+          from pathlib import Path
+          a=json.loads(Path('catalog/acquisition/bitre-2026-acquired-metadata.json').read_text())
+          by={r['projection_id']:r for r in a['resources'] if 'projection_id' in r}
+          required=('B26-01','B26-02','B26-03','B26-04','B26-05','B26-06',
+                    'B26-07','B26-08','B26-09','B26-10','B26-13','B26-14',
+                    'B26-15','B26-16','B26-17')
+          for pid in required:
+              print('M14B_PINNED_SOURCE',pid,by[pid]['sha256'][:12],flush=True)
+              subprocess.run([sys.executable,'scripts/download_vehicle_sources.py',
+                              '--groups','bitre','--only',by[pid]['resource_id'],
+                              '--download'],check=True)
+          PY
+      - name: Extract published state-class workbook and stage independent source projections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import extract_workbook_controls,find_workbook,write_controls
+          c=extract_workbook_controls(find_workbook())
+          assert c['national_total']==22771150
+          write_controls(c,Path('data/processed/m1/controls'))
+          PY
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03,B26-04,B26-05,B26-06,B26-07,B26-08,B26-09,B26-10,B26-13,B26-14,B26-15,B26-16,B26-17 --parquet --batch-rows 20000
+      - name: Recreate original fixed-seed model and fit training-only calibrated weights
+        run: |
+          python scripts/m13_fit.py --iterations 32
+          python scripts/m13b_expand.py --rows 85000 --seed 42
+          python scripts/m14b_calibrate.py --rounds 4
+      - name: Check independent heldout projection errors only AFTER weights are fixed
+        run: python scripts/m14b_calibrate.py --validate-only
+      - name: Verify national balance, training firewall, paired untouched source and diagnostics
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          m=json.loads(Path('data/reports/m14b/calibration.json').read_text())
+          v=json.loads(Path('data/reports/m14b/heldout-comparison.json').read_text())
+          assert m['pipeline']=='m14b-soft-conditional-v1'
+          assert m['calibrated_rows']==85000
+          assert abs(m['calibrated_expected_mass']-22771150)<.1
+          assert m['max_fourway_mass_residual']<1e-5
+          assert len(m['training_source_ids'])==8
+          assert set(m['training_source_ids']).isdisjoint(m['heldout_ids_strictly_excluded'])
+          assert set(m['heldout_ids_strictly_excluded'])=={'B26-14','B26-16','B26-17'}
+          assert m['governance']['original_m13b_sample_mutated'] is False
+          assert m['governance']['automatic_promotion_to_production'] is False
+          assert m['governance']['model_disclosure_uncertainty_estimated'] is False
+          assert len(v['comparison'])==3
+          assert v['holdout_not_used_for_hyperparameter_selection'] is False or v['holdout_not_used_for_hyperparameter_selection'] is True
+          assert v['holdout_not_used_for_hyperparameter_selection'] is True
+          baseline=pq.read_table(m['original_m13b_sample'])
+          candidate=pq.read_table(m['calibrated_sample'])
+          assert baseline.num_rows==candidate.num_rows==85000
+          assert baseline.schema==candidate.schema
+          for k in baseline.column_names:
+              if k!='expected_vehicle_weight':
+                  assert baseline[k].equals(candidate[k])
+          for score in v['comparison']:
+              assert score['published_cells_compared']>0
+              assert score['comparison_cells_with_sample_support']>0
+              assert score['holdout_never_used_for_fit']
+              assert math.isfinite(score['baseline_published_cell_WAPE'])
+              assert math.isfinite(score['candidate_published_cell_WAPE'])
+              print('M14B_PAIRED_HOLDOUT',score['projection_id'],
+                    'baseline',score['baseline_published_cell_WAPE'],
+                    'candidate',score['candidate_published_cell_WAPE'],
+                    'delta',score['delta_candidate_minus_baseline_WAPE'],
+                    'source_coverage',score['fraction_comparison_cells_with_sample_support'])
+          for b,a in zip(m['calibration']['training_objectives_before'],
+                         m['calibration']['training_objectives_after']):
+              print('M14B_TRAIN',b['source_id'],
+                    'eligible_scopes',b['eligible_scopes'],
+                    'before',b['within_scope_comparable_conditional_MAE_fraction'],
+                    'after',a['within_scope_comparable_conditional_MAE_fraction'])
+          print('M14B_REAL_SOURCE_VALIDATION_COMPLETE',m['calibrated_rows'])
+          PY
+      - name: Keep published-source metadata only, not raw or synthetic vehicle rows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m14b-source-audit-${{ github.run_id }}
+          path: |
+            data/reports/m14b/calibration.json
+            data/reports/m14b/heldout-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
