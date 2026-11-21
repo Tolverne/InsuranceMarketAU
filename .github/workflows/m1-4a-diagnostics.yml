@@ -27,6 +27,6 @@ jobs:
       - name: Install project for source, model and analysis tests
         run: python -m pip install -e ".[data,model,dev]"
       - name: Compile model, CLI and Streamlit interfaces
-        run: python -m py_compile src/insurance_market_au/data_foundation/m14.py scripts/m14_validate.py apps/m13b_explorer.py
+        run: python -m py_compile src/insurance_market_au/data_foundation/m14.py scripts/m14_validate.py apps/m13b_explorer.py apps/m14_validation_panel.py
       - name: Validate independent holdout, source contracts, reproducibility and M1.3 regression
         run: python -m pytest -q tests/test_m14_diagnostics.py tests/test_m13b_conditional.py tests/test_m13_calibration.py

@@ -158,3 +158,17 @@ def test_diagnostics_refuse_leaking_holdout_into_training(tmp_path, monkeypatch)
     monkeypatch.setattr(m14, "TRAIN_SPECS", unsafe)
     with pytest.raises(ValueError, match="Heldout"):
         m14.read_heldout_reference(tmp_path)
+
+
+def test_pinned_m14_governance_matches_code():
+    from insurance_market_au.data_foundation.m1 import ROOT
+    policy = json.loads(
+        (ROOT / "catalog/validation/m14-diagnostics-policy.json").read_text(encoding="utf-8")
+    )
+    assert policy["validation"]["independent_source"] == m14.HELDOUT_ID
+    assert policy["validation"]["minimum_original_published_cell_count"] == m14.MIN_PUBLISHED
+    assert policy["validation"]["fourway_max_count_error_tolerance"] == 1e-5
+    assert set(policy["validation"]["excluded_training_source_ids"]) == set(m13b.HOLDOUT_SPECS)
+    assert set(policy["sensitivity_predeclared"]["sizes"]) == {85000,220000}
+    assert policy["market_release_gate"]["high_dimensional_model_validated"] is False
+    assert policy["market_release_gate"]["commercial_addressable_market_approved"] is False
