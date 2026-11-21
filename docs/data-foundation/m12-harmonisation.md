@@ -57,7 +57,7 @@ All required source files are already downloaded on your computer; **do not re-d
     py -3 scripts/m12_harmonise.py --groups vic,sa,act --parquet
     py -3 scripts/m12_harmonise.py --groups nsw --parquet
 
-A source-profile JSON is written under **data/reports/m12/**. Sampled runs write **source-profile-sample.json** and are explicitly labelled partial. Successful Parquet files are written under **data/processed/m12/stock/** and **data/processed/m12/flow/** and remain excluded from Git.
+A source-profile JSON and a separate per-jurisdiction **coverage-matrix.json** are written under **data/reports/m12/**. The matrix preserves all eight national BITRE state controls, identifies locally available supplemental stock vs flow evidence by date/geography, and distinguishes states with BITRE-only evidence from states not selected in a partial run. Sampled runs write **source-profile-sample.json** and are explicitly labelled partial. Successful Parquet files are written under **data/processed/m12/stock/** and **data/processed/m12/flow/** and remain excluded from Git.
 
 **Note:** the source-profile JSON is replaced on each non-sampled invocation. Save reports that you want to compare across runs under distinct local filenames. The QLD full-grain profiler may take longer because its historical files are large; Parquet staging for QLD is optional until the source-grain review is complete.
 

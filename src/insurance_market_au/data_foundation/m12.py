@@ -500,6 +500,60 @@ def _atomic_json(path: Path,obj: Any) -> None:
         temp.unlink(missing_ok=True)
 
 
+def build_coverage_matrix(report: dict) -> dict:
+    """Make every jurisdiction's BITRE baseline and supplemental evidence explicit.
+
+    A missing local source is not a missing national registered-vehicle fleet.
+    Requested-but-unavailable and not-requested are different statuses.
+    """
+    rows=[]
+    by_state=defaultdict(list)
+    for profile in report["source_profiles"]:
+        by_state[profile["jurisdiction"]].append(profile)
+    requested=set(report["groups_requested"])
+    for state in STATE_LABEL:
+        profiles=by_state[state]
+        relevant_groups={
+            "NSW":{"nsw"},"Vic":{"vic"},"Qld":{"qld","qld_flows"},
+            "SA":{"sa","sa_mirror"},"ACT":{"act"},
+        }.get(state,set())
+        if not relevant_groups:
+            status="bitre_only_no_additional_granular_local_source"
+        elif not (requested & relevant_groups):
+            status="supplemental_sources_not_requested_in_this_run"
+        elif not profiles:
+            status="supplemental_sources_requested_but_unavailable_or_invalid"
+        elif not any(p["kind"]=="stock" for p in profiles):
+            status="flow_only_no_supplemental_registration_stock"
+        else:
+            status="supplemental_publisher_evidence_available_not_bitre_equivalent"
+        rows.append({
+            "registration_jurisdiction":state,
+            "bitre_2026_01_registered_motor_vehicles":report["bitre_state_controls"][state],
+            "supplemental_status":status,
+            "stock_source_ids":[p["source_id"] for p in profiles if p["kind"]=="stock"],
+            "flow_source_ids":[p["source_id"] for p in profiles if p["kind"]=="flow"],
+            "source_observation_dates":sorted({
+                day for p in profiles for day in p["observed_dates"]
+                if day!="DATE_UNKNOWN"
+            }),
+            "geography_roles":sorted({p["geography_role"] for p in profiles}),
+            "observed_input_rows_not_unique_vehicles":sum(p["source_rows"] for p in profiles),
+            "approved_bitre_class_crosswalk":False,
+            "date_and_scope_comparable_to_bitre":False,
+        })
+    if sum(r["bitre_2026_01_registered_motor_vehicles"] for r in rows)!=22771150:
+        raise ValueError("M1.2 coverage matrix BITRE state totals do not reconcile")
+    return {
+        "report_version":"0.1.0",
+        "national_bitre_registered_motor_vehicles":22771150,
+        "observation_date":REFERENCE_DATE,
+        "report_is_population_release":False,
+        "jurisdictions":rows,
+        "interpretation":"Supplemental evidence is a different universe, date, measure, or geography until validated crosswalks and models are approved.",
+    }
+
+
 def run_m12(*,root:Path=ROOT,groups:set[str] | None=None,parquet:bool=False,
             limit_rows:int | None=None,batch_rows:int=50000,
             only_source:str | None=None,fail_on_error:bool=False) -> dict:
@@ -552,6 +606,10 @@ def run_m12(*,root:Path=ROOT,groups:set[str] | None=None,parquet:bool=False,
     path=root/"data/reports/m12"/("source-profile-sample.json" if limit_rows is not None
                                  else "source-profile.json")
     _atomic_json(path,report)
+    coverage=build_coverage_matrix(report)
+    coverage_path=root/"data/reports/m12"/(
+        "coverage-matrix-sample.json" if limit_rows is not None else "coverage-matrix.json")
+    _atomic_json(coverage_path,coverage)
     if fail_on_error and failures:
         raise RuntimeError(f"M1.2 had {len(failures)} source failures; see {path}")
     return report

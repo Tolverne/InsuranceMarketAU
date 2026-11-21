@@ -207,3 +207,20 @@ def test_sa_mirror_fallback_must_stay_separate(tmp_path:Path):
     profile=run_m12(root=tmp_path,groups={"sa"})["source_profiles"][0]
     assert profile["source_rows"]==1
     assert profile["source_tier"]=="fallback_only"
+
+
+def test_coverage_matrix_preserves_bitre_only_jurisdictions(tmp_path:Path):
+    root_fixture(tmp_path)
+    sid="vic_model_q3_2026"
+    acquired(tmp_path,sid,"vic","2026-09-30",
+             b"CD_MAKE_VEH1,CD_MODEL_VEH,CD_CLR_BDY_VEH_P,TOTAL1\nVolvo,XC60,White,3\n")
+    run_m12(root=tmp_path,groups={"vic"},fail_on_error=True)
+    matrix=json.loads((tmp_path/"data/reports/m12/coverage-matrix.json").read_text())
+    assert matrix["national_bitre_registered_motor_vehicles"]==22771150
+    by={x["registration_jurisdiction"]:x for x in matrix["jurisdictions"]}
+    assert len(by)==8
+    for state in ("WA","Tas","NT"):
+        assert by[state]["supplemental_status"]=="bitre_only_no_additional_granular_local_source"
+        assert by[state]["bitre_2026_01_registered_motor_vehicles"]>0
+    assert by["Vic"]["stock_source_ids"]==[sid]
+    assert not by["Vic"]["approved_bitre_class_crosswalk"]
