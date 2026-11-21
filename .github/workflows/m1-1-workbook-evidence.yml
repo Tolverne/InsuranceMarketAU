@@ -1,0 +1,44 @@
+name: M1.1 BITRE workbook evidence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-1-workbook-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-workbook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install workbook parser
+        run: python -m pip install openpyxl
+      - name: Download official summary workbook
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+      - name: Inspect actual workbook structure, tables and formula values
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import openpyxl
+          p=next(Path('data/raw/bitre/2026-01-31').glob('bitre-summary*.xlsx'))
+          wb=openpyxl.load_workbook(p, read_only=True, data_only=True)
+          for sheet in wb:
+              print('M11_SHEET',repr(sheet.title),'dimensions',sheet.max_row,sheet.max_column)
+              n=0
+              for rownum,row in enumerate(sheet.iter_rows(values_only=True),1):
+                  used=[(i+1,str(v).strip().replace(chr(10),' ')[:80])
+                        for i,v in enumerate(row[:18]) if v is not None and str(v).strip()]
+                  if used:
+                      print('M11_ROW',repr(sheet.title),rownum,repr(used[:12]))
+                      n+=1
+                  if rownum>=45 or n>=35:
+                      break
+          PY
