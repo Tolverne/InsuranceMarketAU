@@ -1,0 +1,57 @@
+name: M1.2 source probe supplemental
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-2-supplemental-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download NSW primary registrations and small QLD suburb sample
+        run: |
+          python scripts/download_vehicle_sources.py --groups nsw --static-only --only nsw_registrations_2026 --download
+          python scripts/download_vehicle_sources.py --groups qld --only 9c479cfb-8c19-4759-ad34-bc3123079b94 --download
+          python scripts/download_vehicle_sources.py --groups qld --only 9f818bd5-4efa-4781-87e7-db600b62bfd8 --download --max-file-mb 3000
+          python scripts/download_vehicle_sources.py --groups sa --download
+      - name: Inspect real ZIP and CSV source schema, special count cells
+        run: |
+          python - <<'PY'
+          import csv, pathlib, zipfile, collections
+          root=pathlib.Path('data/raw')
+          for path in sorted(root.rglob('*')):
+              if not path.is_file() or path.suffix.lower() not in ('.csv','.zip'):
+                  continue
+              print('M12_SECOND_FILE',str(path.relative_to(root)),path.stat().st_size)
+              if path.suffix.lower()=='.csv':
+                  with path.open(encoding='utf-8-sig',errors='replace',newline='') as fp:
+                      reader=csv.reader(fp)
+                      for i,row in zip(range(3),reader):
+                          print('M12_SECOND_CSV',i,repr(row)[:1300])
+                  if path.parent.parent.name=='sa':
+                      with path.open(encoding='utf-8-sig',errors='replace',newline='') as fp:
+                          reader=csv.DictReader(fp)
+                          counts=collections.Counter()
+                          for row in reader:
+                              if row.get('Total(TOTAL_VEHICLES)'):
+                                  counts[row['Total(TOTAL_VEHICLES)']]+=1
+                          print('M12_SA_TOTAL_COLUMN',counts.most_common(10))
+              else:
+                  with zipfile.ZipFile(path) as zf:
+                      members=[m for m in zf.infolist() if m.filename.lower().endswith('.csv')]
+                      print('M12_SECOND_MEMBERS',len(members))
+                      for member in members[:2]+(members[-1:] if len(members)>2 else []):
+                          with zf.open(member) as fp:
+                              lines=[fp.readline().decode('utf-8-sig','replace').strip()[:1200] for _ in range(3)]
+                          print('M12_SECOND_MEMBER',member.filename,member.file_size,repr(lines)[:1800])
+          PY
