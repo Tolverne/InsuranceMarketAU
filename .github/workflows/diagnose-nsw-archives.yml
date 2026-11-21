@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
       - name: Download NSW age and heavy configuration archives
         run: |
-          python scripts/download_vehicle_sources.py --groups nsw --only nsw_age_2026 --download --report data/reports/nsw-age.json
+          python scripts/download_vehicle_sources.py --groups nsw --only nsw_age_2026 --download --report data/reports/nsw-age.json || true
           python scripts/download_vehicle_sources.py --groups nsw --only nsw_heavy_2026 --download --report data/reports/nsw-heavy.json
       - name: Report SHA-256 and ZIP member metadata
         run: |
@@ -41,8 +41,16 @@ jobs:
               digest = hashlib.sha256(f.read_bytes()).hexdigest()
               result[f.name] = {"sha256": digest, "members": members, "first_csv_header": header}
           print("NSW_SOURCE_AUDIT=" + json.dumps(result, indent=2))
-          if len(result) != 2:
-              raise SystemExit(f"Expected 2 ZIPs; found {len(result)}")
+          age_report = json.loads(pathlib.Path("data/reports/nsw-age.json").read_text())
+          age_record = age_report["resources"][0]
+          age_failed_as_expected = (age_record["status"] == "failed"
+                                    and "Source content mismatch" in age_record.get("error", ""))
+          if len(result) == 1 and not age_failed_as_expected:
+              raise SystemExit("NSW age download failed for unexpected reason")
+          if len(result) not in {1, 2}:
+              raise SystemExit(f"Expected 1 or 2 ZIPs, found {len(result)}")
+          if age_failed_as_expected:
+              print("SOURCE_GUARD_OK: publisher mismatch rejected for NSW age archive")
           hashes = {x["sha256"] for x in result.values()}
           if len(hashes) == 1:
               print("SOURCE_ALERT: age and heavy 2026 download URLs return IDENTICAL bytes")

@@ -2,6 +2,7 @@
 
 - [Automatic source download guide (M0.2)](downloading-data.md)
 - [Verified source download smoke findings](verified-download-smoke.md)
+- [NSW 2026 ZIP integrity incident and quarantine instructions](nsw-archive-integrity.md)
 - [Research report / jurisdiction matrix](M0.1-report.md)
 - [BITRE 2026 detailed extract inventory](bitre-2026-extract-inventory.md)
 - [Canonical field and geographic-role availability](field-availability.md)
