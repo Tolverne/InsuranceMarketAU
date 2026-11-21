@@ -134,3 +134,16 @@ def test_physical_header_drift_rejected(tmp_path: Path) -> None:
     resource["expected_headers"] = ["vehicle_type", "registered_postcode", "no_vehicles"]
     with pytest.raises(ValueError, match="physical header drift"):
         profile_projection(f, resource)
+
+
+def test_inconsistent_pinned_metrics_never_publish_parquet(tmp_path: Path) -> None:
+    pytest.importorskip("pyarrow")
+    path = tmp_path / "source.csv"
+    path.write_text("vehicle_type,no_vehicles\nPassenger vehicles,4\n", encoding="utf-8")
+    metadata = _resource(path, "B26-05", ["vehicle_type"])
+    metadata["expected_rows"] = 2  # Real input contains only one row.
+    target = tmp_path / "output.parquet"
+    with pytest.raises(ValueError, match="observed rows"):
+        profile_projection(path, metadata, parquet_path=target, batch_rows=1)
+    assert not target.exists()
+    assert not target.with_name(target.name + ".partial").exists()
