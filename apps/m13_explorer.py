@@ -17,6 +17,14 @@ import streamlit as st
 ROOT=Path(__file__).resolve().parents[1]
 JOINT=ROOT/"data/processed/m13/joint-state-type-year-fuel.parquet"
 REPORT=ROOT/"data/reports/m13/pilot-validation.json"
+# Preserve the original command and its M1.3a fallback. Once the expanded
+# local weighted sample exists, load the new make/model/geography interface.
+# Exactly one page calls set_page_config() per Streamlit run.
+if (ROOT / "data/processed/m13b/weighted-synthetic-fleet.parquet").is_file():
+    import runpy
+    runpy.run_path(str(ROOT / "apps/m13b_explorer.py"), run_name="__main__")
+    st.stop()
+
 st.set_page_config(page_title="Australian Fleet M1.3a",layout="wide")
 st.title("Synthetic Australian vehicle population — M1.3a")
 st.caption("31 January 2026 BITRE | modelled expected counts, NOT real vehicles or insured policies")
