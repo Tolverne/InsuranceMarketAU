@@ -77,3 +77,26 @@ No automatic uploads to GitHub or S3. No synthetic vehicle population created.
 The workbook layout is verified against the **official publisher XLSX**, not an invented spreadsheet layout. Tests cover source hash/layout drift, the 99 control cells, additive inconsistencies, total-row exclusion, genuinely missing margins, postcode-role separation, and staged Parquet lineage. GitHub CI independently exercises the small real-data pilot and contract tests.
 
 **M1.2** will harmonise the jurisdictional data releases at their actual dates and geographic roles. **M1.3** will build the sparse-support statistical reconstruction, parameter-uncertainty ensembles, constrained calibration and later synthetic vehicle population release. Before that, we must make a reviewed decision about which workbook and detailed cells can be treated as exact vs soft given BITRE disclosure and record inclusion rules.
+
+
+## Independently verified complete-source audit (21 November 2026)
+
+The [complete 17-projection GitHub Actions audit](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44847246292) **passed**. It streamed all **12,181,645 published aggregate rows**, retained distinct source identities, validated the workbook's **99 control cells**, and computed **47 common-margin comparisons**. All 47 pairs had at least one nonzero residual. Exact audit-level numbers are pinned in [bitre-2026-m11-full-audit.json](../../catalog/acquisition/bitre-2026-m11-full-audit.json).
+
+| Shared margin | Comparisons | Maximum absolute residual | Projection responsible for maximum |
+|---|---:|---:|---|
+| State × vehicle type | 11 | 6,382 | B26-17 vs Table 1 |
+| Type × motive power | 7 | 8,867 | B26-17 vs B26-02 |
+| Type × manufacture year | 7 | 1,640 | B26-16 vs B26-01 |
+| State × type × motive power | 4 | 4,235 | B26-17 vs B26-03 |
+| State × type × manufacture year | 4 | 596 | B26-16 vs B26-01 |
+| Type × registered postcode | 6 | 133 | B26-13 vs B26-04 |
+| Type × garaging postcode | 1 | 95 | B26-12 vs B26-09 |
+| Type × make × model | 7 | 257 | B26-17 vs B26-05 |
+
+The **8,867 vehicle** difference occurs in the **passenger × petrol** margin: B26-02 reports 12,611,695 and B26-17 reports 12,602,828 (0.0703%). The **6,382** NSW passenger vehicle difference from the workbook is 0.1337%. Smaller make/model categories can show much larger *relative* discrepancies; those are especially important for classic/prestige segments.
+
+The audit saw **4,177,485 numeric zero cells** across the 17 published tables, and no nonnumeric count tokens. This is emphatically **not** a count of zero vehicles or of definitively suppressed individuals. Suppression/perturbation occurs inside the published numeric values and can accumulate in high-dimensional margins. Both positive published values and published zeros remain subject to disclosure-adjustment uncertainty. Do **not** set an exact cell-level equality or an invented ±n error tolerance from these observations.
+
+**M1.1 quality gate:** workbook and source-provenance parsing **passed**; total/segment parity diagnostics **passed as measurement**, not as a calibration criterion. The high-dimensional B26-16/B26-17 discrepancies are **flagged for future soft-constraint selection, uncertainty modeling, and independent holdout testing** in M1.3. No constrained synthetic population has yet been released.
+
