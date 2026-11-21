@@ -42,3 +42,21 @@ jobs:
                   if rownum>=45 or n>=35:
                       break
           PY
+
+      - name: Inspect complete Table 1 controls and notes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import openpyxl
+          p=next(Path('data/raw/bitre/2026-01-31').glob('bitre-summary*.xlsx'))
+          wb=openpyxl.load_workbook(p, read_only=True, data_only=True)
+          for sheetname in ('Table 1', 'Explanatory Notes'):
+              s=wb[sheetname]
+              for row_num,row in enumerate(s.iter_rows(values_only=True),1):
+                  if sheetname=='Table 1' and row_num<38:
+                      continue
+                  values=[(i+1,str(x).strip().replace(chr(10),' ')[:200])
+                          for i,x in enumerate(row[:12]) if x is not None and str(x).strip()]
+                  if values:
+                      print('M11_EXACT',repr(sheetname),row_num,repr(values))
+          PY
