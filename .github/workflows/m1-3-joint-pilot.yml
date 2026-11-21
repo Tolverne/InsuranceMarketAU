@@ -65,6 +65,15 @@ jobs:
           assert r['initial_holdout']['trained_on_holdout'] is False
           assert r['fitted_holdout']['trained_on_holdout'] is False
           assert math.isfinite(r['fitted_holdout']['overall_published_cell_wape'])
+          # Pinned-release reproducibility gates; NOT universal statistical
+          # disclosure bounds or individual-car prediction guarantees.
+          assert r['fitted_holdout']['overall_published_cell_wape'] < r['initial_holdout']['overall_published_cell_wape']
+          assert r['fitted_holdout']['overall_published_cell_wape'] < 0.05
+          older=r['heldout_segment_diagnostics']['age_cohorts']
+          assert older['manufactured_before_1980']['published_cell_WAPE'] < 0.10
+          assert older['manufactured_before_1990']['published_cell_WAPE'] < 0.10
+          assert older['manufactured_before_2000']['published_cell_WAPE'] < 0.10
+          print('M13_OLD_VEHICLE_VALIDATION', {k:v['published_cell_WAPE'] for k,v in older.items()})
           joint=pq.read_table(r['expected_joint_parquet'])
           assert joint.num_rows==r['joint_support_cells']
           assert set(['registered_state','vehicle_type','manufacture_year','motive_power']).issubset(joint.column_names)
