@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from insurance_market_au.data_foundation.m1 import (
-    count_value, mapped_columns, profile_projection, reconcile_profiles, sha256_file,
+    count_value, is_published_total, mapped_columns, profile_projection, reconcile_profiles, sha256_file,
 )
 
 
@@ -106,3 +106,22 @@ def test_parquet_preserves_original_raw_dimensions(tmp_path: Path) -> None:
         "year_of_manufacture": "1902",
     }
     assert not list(tmp_path.glob("*.partial"))
+
+
+def test_total_categories_excluded_from_leaf_counts(tmp_path: Path) -> None:
+    assert is_published_total({"vehicle_type": "Total", "state_abb": "-"}) is True
+    assert is_published_total({"vehicle_type": "-", "motive_power": "-"}) is True
+    assert is_published_total({"vehicle_type": "Passenger vehicles", "state_abb": "Total"}) is True
+    assert is_published_total({"vehicle_type": "Passenger vehicles", "state_abb": "-"}) is False
+    f = tmp_path / "with-grand-total.csv"
+    f.write_text(
+        "vehicle_type,state_abb,year_of_manufacture,no_vehicles\n"
+        "Passenger vehicles,NSW,2020,11\n"
+        "Total,-,-,11\n", encoding="utf-8"
+    )
+    p = profile_projection(f, _resource(f, "B26-01", []))
+    assert p["numeric_total"] == 22  # Unfiltered source sum has duplication!
+    assert p["detail_numeric_total"] == 11
+    assert p["published_total_rows"] == 1
+    assert p["published_total_numeric_total"] == 11
+    assert len(p["state_vehicle_type_controls"]) == 1

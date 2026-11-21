@@ -102,6 +102,20 @@ def mapped_columns(headers: list[str]) -> tuple[dict[str, str], list[str]]:
                      and _normalise_header(name) not in COUNT_HEADERS]
 
 
+def is_published_total(dimensions: dict[str, str | None]) -> bool:
+    """Identify displayed aggregates without confusing them with leaf observations.
+
+    In the verified 2026 BITRE extracts vehicle_type 'Total' or '-' denotes
+    the national grand-total row. Other fields sometimes say 'Total' too.
+    A hyphen in another dimension *alone* is not treated as a total.
+    """
+    values = {_normalise_header(key): (value or "").strip().casefold()
+              for key, value in dimensions.items()}
+    return values.get("vehicle_type") in {"total", "-"} or any(
+        value == "total" for value in values.values()
+    )
+
+
 def _schema():
     try:
         import pyarrow as pa
@@ -115,6 +129,7 @@ def _schema():
         pa.field("vehicle_count", pa.int64()),
         pa.field("published_count_raw", pa.string()),
         pa.field("count_status", pa.string()),
+        pa.field("is_published_total", pa.bool_()),
         *[pa.field(name, pa.string()) for name in CANONICAL_COLUMNS],
         pa.field("source_dimensions_json", pa.string()),
     ])
@@ -145,6 +160,8 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
         "record_grain": "one published confidentialised aggregate stock cell",
         "geography_role": resource.get("postcode_role"),
         "rows": 0, "numeric_rows": 0, "numeric_total": 0,
+        "detail_numeric_rows": 0, "detail_numeric_total": 0,
+        "published_total_rows": 0, "published_total_numeric_total": 0,
         "zero_numeric_rows": 0, "suppressed_rows": 0, "unrecognized_count_rows": 0,
         "expected_dimensions": resource.get("expected_dimensions", []),
         "count_reconciliation_status": "diagnostic_only_not_hard_controls",
@@ -178,9 +195,17 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                     raise ValueError(f"{path.name}: row {ordinal} has more columns than header")
                 count_status, count = count_value(source_row[count_col])
                 dimensions = {col: source_row[col] for col in headers if col != count_col}
+                published_total = is_published_total(dimensions)
+                if published_total:
+                    stats["published_total_rows"] += 1
                 if count_status == "published_confidentialised_numeric":
                     stats["numeric_rows"] += 1
                     stats["numeric_total"] += count
+                    if published_total:
+                        stats["published_total_numeric_total"] += count
+                    else:
+                        stats["detail_numeric_rows"] += 1
+                        stats["detail_numeric_total"] += count
                     if count == 0:
                         stats["zero_numeric_rows"] += 1
                 elif count_status == "suppressed_or_not_numeric":
@@ -188,7 +213,7 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                 else:
                     stats["unrecognized_count_rows"] += 1
                 stats["rows"] += 1
-                if resource["projection_id"] in CONTROL_PROJECTIONS:
+                if resource["projection_id"] in CONTROL_PROJECTIONS and not published_total:
                     state_field = mapping.get("registered_state")
                     group = (source_row.get(state_field, "<NO_STATE>"), source_row[mapping["vehicle_type"]])
                     key = json.dumps(group)
@@ -207,6 +232,7 @@ def profile_projection(path: Path, resource: dict[str, Any], *,
                         "vehicle_count": count,
                         "published_count_raw": source_row.get(count_col),
                         "count_status": count_status,
+                        "is_published_total": published_total,
                         **canonical,
                         "source_dimensions_json": json.dumps(dimensions, ensure_ascii=False, sort_keys=True),
                     })

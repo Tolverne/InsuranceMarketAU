@@ -45,12 +45,14 @@ jobs:
           assert report["outputs"] == "parquet"
           for item in report["profiles"]:
               assert item["rows"] > 0, item["projection_id"]
+              assert item["published_total_rows"] >= 1
+              assert item["detail_numeric_total"] == 22771150, item["projection_id"]
               f = Path(item["parquet_file"])
               pf = pq.ParquetFile(f)
               assert pf.metadata.num_rows == item["rows"]
               print("M1_REAL_PROFILE", item["projection_id"], "rows", item["rows"],
                     "numeric", item["numeric_rows"], "suppressed", item["suppressed_rows"],
-                    "numeric_total", item["numeric_total"],
+                    "raw_numeric_sum", item["numeric_total"], "detail_numeric_total", item["detail_numeric_total"],
                     "headers", item["headers"])
           print("M1_REAL_TOTAL", sum(x["rows"] for x in report["profiles"]))
           PY

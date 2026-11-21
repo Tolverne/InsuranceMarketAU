@@ -10,6 +10,8 @@ The January 2026 BITRE dataset is an excellent national backbone: 17 confidentia
 
 ### BITRE confidentiality (from actual explanatory notes)
 
+**Published total rows:** Real-world pilot inspection found a national total of **22,771,150** is present *as an additional source row* in each of three BITRE projections. The raw `no_vehicles` column sums to **45,542,300**, exactly twice the national fleet, when the grand-total record is naively included. The pipeline flags `vehicle_type='Total'` and `vehicle_type='-'` (plus explicit `Total` in any dimension) as published aggregate rows, retains them in Parquet for audit, and computes `detail_numeric_total` separately from `numeric_total`. This has been checked against three actual extracts, but other projection schemas remain to be profiled.
+
 BITRE states that detailed tables suppress cells with **fewer than 3 units**, and perturb or suppress secondary cells, including totals, to reduce identification risks. Therefore summing interior cells may differ from totals in a detailed table or published workbook. Further, **garaging postcode** is sometimes replaced with registered postcode when true garaging postcode was unavailable. Some registered postcodes may be administrative rather than residential, invalid postcode uses `UNKN`, and registration jurisdiction may not equal address location.
 
 **M1.0 policy:** preserve every original count string, represent numeric disclosure-adjusted counts separately, and classify any nonnumeric count as unavailable, **not zero**. Never silently apply IPF as though all these numbers are hard controls. The report includes reconciliation residuals labelled *diagnostic only*.
