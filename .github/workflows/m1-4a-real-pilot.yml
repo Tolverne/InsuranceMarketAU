@@ -1,0 +1,104 @@
+name: M1.4a official-source model diagnostics and Monte Carlo sensitivity
+
+# Heavy validation samples are intentionally not part of routine CI.
+# The first PR execution runs once; future runs are manual.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verified-m14-diagnostic-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned project dependencies
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Run fixture and regression test suite
+        run: python -m pytest -q tests/test_m14_diagnostics.py tests/test_m13b_conditional.py tests/test_m13_calibration.py
+      - name: Download official workbook, training and one independent holdout projection
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+          data=json.loads(Path('catalog/acquisition/bitre-2026-acquired-metadata.json').read_text())
+          indexed={x['projection_id']:x for x in data['resources'] if 'projection_id' in x}
+          ids=('B26-01','B26-02','B26-03','B26-04','B26-05','B26-06',
+               'B26-07','B26-08','B26-09','B26-10','B26-13','B26-14','B26-15')
+          for pid in ids:
+              print('M14_OFFICIAL_SOURCE',pid,indexed[pid]['sha256'][:12],flush=True)
+              subprocess.run(
+                  [sys.executable,'scripts/download_vehicle_sources.py',
+                   '--groups','bitre','--only',indexed[pid]['resource_id'],'--download'],
+                  check=True,
+              )
+          PY
+      - name: Stage publisher source Parquet and authoritative controls
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import extract_workbook_controls,find_workbook,write_controls
+          controls=extract_workbook_controls(find_workbook())
+          assert controls['national_total']==22771150
+          write_controls(controls,Path('data/processed/m1/controls'))
+          PY
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03,B26-04,B26-05,B26-06,B26-07,B26-08,B26-09,B26-10,B26-13,B26-14,B26-15 --parquet --batch-rows 20000
+      - name: Build unchanged M1.3a/B model and heldout diagnostics
+        run: |
+          python scripts/m13_fit.py --iterations 32
+          python scripts/m13b_expand.py --rows 85000 --seed 42
+          python scripts/m14_validate.py
+      - name: Repeated-seed sample-size sensitivity without overwriting the explorer
+        run: |
+          python scripts/m14_validate.py --sensitivity-only --sizes 85000,120000 --seeds 17,53
+      - name: Assert independent source comparison, per-cell balancing and no fake CI
+        run: |
+          python - <<'PY'
+          import json,math
+          from pathlib import Path
+          p=Path('data/reports/m14/current-diagnostics.json')
+          s=Path('data/reports/m14/sampling-sensitivity.json')
+          d=json.loads(p.read_text())
+          x=json.loads(s.read_text())
+          assert d['pipeline']=='m14a-independent-validation-v1'
+          assert d['heldout_source']['id']=='B26-14'
+          assert d['heldout_source']['threshold']==100
+          assert d['heldout_source']['holdout_used_for_sampler'] is False
+          assert d['sample']['sample_rows']==85000
+          assert d['sample']['four_way_support_cells']==64008
+          assert d['sample']['max_four_way_mass_residual']<1e-5
+          assert abs(d['sample']['total_expected_vehicles']-22771150)<.1
+          assert 0<d['metrics']['overall']['published_cell_WAPE']<10
+          assert 0<d['metrics']['overall']['sample_support_fraction']<1
+          assert len(d['metrics']['segments']['make'])>0
+          assert d['metrics']['cohorts_overlap_do_not_add_them']['before_1980']['source_cell_count']>0
+          assert x['original_m13b_sample_and_report_untouched']
+          assert len(x['runs'])==4
+          assert all(r['max_four_way_mass_residual']<1e-5 for r in x['runs'])
+          assert x['holdout_used_for_parameter_tuning'] is False
+          assert all(row['sd_is_Monte_Carlo_only_not_model_confidence_interval'] for row in x['summaries'])
+          print('M14_REAL_HOLDOUT',d['metrics']['overall']['published_cell_WAPE'],
+                'coverage',d['metrics']['overall']['sample_support_fraction'])
+          for row in x['summaries']:
+              if row['metric'] in ('heldout_B26_14_WAPE','before_1980_WAPE'):
+                  print('M14_MC_SENSITIVITY',row['sample_size'],row['metric'],
+                        'mean',row['mean'],'sd',row['sd_across_seeds'])
+          PY
+      - name: Retain only non-identifying aggregate diagnostic JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m14-source-diagnostics-${{ github.run_id }}
+          path: |
+            data/reports/m14/current-diagnostics.json
+            data/reports/m14/sampling-sensitivity.json
+          if-no-files-found: ignore
+          retention-days: 14

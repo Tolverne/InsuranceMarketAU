@@ -418,7 +418,9 @@ def _sample_schema(pa):
 
 
 def build_weighted_sample(root: Path = ROOT, *, rows: int = 220000,
-                          seed: int = SEED, rebuild_conditionals: bool = False) -> dict:
+                          seed: int = SEED, rebuild_conditionals: bool = False,
+                          output_path: Path | None = None,
+                          report_path: Path | None = None) -> dict:
     """Create a local filtered-analysis POC with exact four-way weighted totals."""
     pa, pq = _require_pyarrow()
     if rows > 2_000_000:
@@ -427,7 +429,8 @@ def build_weighted_sample(root: Path = ROOT, *, rows: int = 220000,
     preparation = prepare_conditionals(root, rebuild=rebuild_conditionals)
     rng = np.random.default_rng(seed)
     allocated = _allocations(weights, rows, rng)
-    output = root / PATH_ROWS
+    output = output_path if output_path is not None else root / PATH_ROWS
+    destination_report = report_path if report_path is not None else root / PATH_REPORT
     output.parent.mkdir(parents=True, exist_ok=True)
     temp = output.with_name(output.name + ".partial")
     temp.unlink(missing_ok=True)
@@ -534,7 +537,7 @@ def build_weighted_sample(root: Path = ROOT, *, rows: int = 220000,
         "population_release_created": False,
         "source_microdata_linkage_performed": False,
     }
-    _atomic_json(root / PATH_REPORT, report)
+    _atomic_json(destination_report, report)
     return report
 
 

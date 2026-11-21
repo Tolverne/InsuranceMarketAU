@@ -151,8 +151,9 @@ def chart(frame: pd.DataFrame, dimension: str, *, n: int = 20) -> None:
     st.bar_chart(series, y_label="Weighted synthetic expected vehicles")
 
 
-overview, makes_tab, geography, sample_rows_tab, validation = st.tabs([
-    "Overview", "Make and model", "Registered versus garaging geography", "Synthetic sample rows", "Validation and provenance"
+overview, makes_tab, geography, sample_rows_tab, diagnostic_tab, validation = st.tabs([
+    "Overview", "Make and model", "Registered versus garaging geography",
+    "Synthetic sample rows", "Model diagnostics", "Validation and provenance"
 ])
 with overview:
     x,y = st.columns(2)
@@ -217,6 +218,12 @@ with sample_rows_tab:
             "make", "model", "registered_postcode", "garaging_postcode",
             "expected_vehicle_weight"]
     st.dataframe(selected[cols].head(500), hide_index=True, use_container_width=True)
+
+with diagnostic_tab:
+    # Optional read-only audit: no model fitting or raw source reads occur
+    # in the explorer. All diagnostics are precomputed by m14_validate.py.
+    import runpy
+    runpy.run_path(str(ROOT / "apps/m14_validation_panel.py"), run_name="__main__")
 
 with validation:
     st.subheader("Model provenance and calibration")
