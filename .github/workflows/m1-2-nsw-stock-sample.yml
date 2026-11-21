@@ -3,9 +3,6 @@ name: M1.2 NSW primary registration ZIP sample
 # Real 160 MB NSW official ZIP, multiple monthly/split members. Run once
 # to verify the ingestion contract, then use workflow_dispatch for refresh.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-2-nsw-stock-sample.yml"
   workflow_dispatch:
 
 permissions:

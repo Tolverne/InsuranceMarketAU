@@ -1,9 +1,6 @@
 name: M1.2 source probe supplemental
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-2-supplemental-probe.yml"
   workflow_dispatch:
 
 permissions:
@@ -37,7 +34,9 @@ jobs:
                   with path.open(encoding='utf-8-sig',errors='replace',newline='') as fp:
                       reader=csv.reader(fp)
                       for i,row in zip(range(3),reader):
-                          print('M12_SECOND_CSV',i,repr(row)[:1300])
+                          print('M12_SECOND_CSV',i,
+                                '[REDACTED UNIT-LEVEL ROW]' if path.relative_to(root).parts[0]=='qld' and i>0
+                                else repr(row)[:1300])
                   if path.parent.parent.name=='sa':
                       with path.open(encoding='utf-8-sig',errors='replace',newline='') as fp:
                           reader=csv.DictReader(fp)

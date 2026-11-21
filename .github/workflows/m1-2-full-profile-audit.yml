@@ -1,9 +1,6 @@
 name: M1.2 real source full-count profile audit
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-2-full-profile-audit.yml"
   workflow_dispatch:
 
 permissions:

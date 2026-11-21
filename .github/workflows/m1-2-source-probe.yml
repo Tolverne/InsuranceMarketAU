@@ -1,9 +1,6 @@
 name: M1.2 state source physical schema evidence
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-2-source-probe.yml"
   workflow_dispatch:
 
 permissions:
