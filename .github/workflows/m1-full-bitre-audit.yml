@@ -1,0 +1,60 @@
+name: M1 full BITRE source-profile audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/m1-full-bitre-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-bitre-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install M1 profiling package
+        run: python -m pip install -e ".[dev]"
+      - name: Acquire all 17 official BITRE January 2026 projections and notes
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --download --report data/reports/bitre-complete-download.json
+      - name: Run full streaming M1.0 profile
+        run: |
+          python scripts/m1_ingest.py --profile-only
+      - name: Verify full inventory and summarise actual source headers
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path("data/reports/m1/bitre-2026-profile.json").read_text())
+          assert r["complete_17"] is True
+          assert r["projection_count"] == 17
+          print("M1_FULL_ROWS",sum(p["rows"] for p in r["profiles"]))
+          print("M1_SUPPRESSED_ROWS",sum(p["suppressed_rows"] for p in r["profiles"]))
+          print("M1_UNRECOGNISED_ROWS",sum(p["unrecognized_count_rows"] for p in r["profiles"]))
+          for p in r["profiles"]:
+              print("M1_SOURCE",p["projection_id"],"rows",p["rows"],
+                    "detail_numeric_total",p["detail_numeric_total"],
+                    "published_total_rows",p["published_total_rows"],
+                    "suppressed",p["suppressed_rows"],
+                    "unrecognized",p["unrecognized_count_rows"],
+                    "headers",p["headers"],
+                    "unmapped",p["unmapped_columns"])
+          print("M1_RECONCILIATION",r["reconciliation"]["checks_with_nonzero_delta"],
+                "nonzero of",len(r["reconciliation"]["checks"]))
+          PY
+      - name: Preserve only metadata/profile reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-full-bitre-audit-${{ github.run_id }}
+          path: |
+            data/reports/m1/bitre-2026-profile.json
+            data/reports/bitre-complete-download.json
+          if-no-files-found: ignore
+          retention-days: 14
