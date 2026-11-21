@@ -180,3 +180,57 @@ def test_missing_exact_conditional_falls_back_without_fake_record_join(tmp_path,
         assert sampler.garage("ACT", "Passenger vehicles", "Petrol") == "UNSPECIFIED"
     finally:
         sampler.close()
+
+
+def test_three_heldouts_are_diagnostic_only_and_leave_generated_rows_unchanged(tmp_path, monkeypatch):
+    pa = pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+    inventory = install_fixtures(tmp_path, monkeypatch)
+    base_rows = [
+        dict(registered_state="NSW", vehicle_type="Passenger vehicles",
+             manufacture_year="1965", motive_power="Petrol",
+             make="HOLDEN", model="EH", registered_postcode="2000",
+             garaging_postcode="2080"),
+        dict(registered_state="Vic", vehicle_type="Passenger vehicles",
+             manufacture_year="2020", motive_power="Electric",
+             make="TESLA", model="MODEL 3", registered_postcode="3000",
+             garaging_postcode="3050"),
+    ]
+    for n, (pid, columns) in enumerate(m13b.HOLDOUT_SPECS.items(), 1):
+        sha = str(n) * 64
+        resource_id = "heldout-fixture-" + pid
+        desc = {
+            "projection_id": pid, "resource_id":resource_id,"sha256":sha,
+            "expected_rows":2, "expected_detail_numeric_total":m13b.TOTAL,
+            "expected_published_total_rows":0,
+        }
+        inventory[pid] = desc
+        records = []
+        for i,(row,mass) in enumerate(zip(base_rows, [1_000_000,21_771_150]),1):
+            record = dict(row)
+            record.update({
+                "source_row":i,"projection_id":pid,
+                "source_release_id":f"bitre-2026:{resource_id}:{sha[:12]}",
+                "observation_date":"2026-01-31",
+                "vehicle_count":mass,
+                "count_status":"published_confidentialised_numeric",
+                "is_published_total":False,
+                "source_dimensions_json":"{}",
+            })
+            records.append(record)
+        f=m13b._stage_path(tmp_path,desc)
+        f.parent.mkdir(parents=True,exist_ok=True)
+        pq.write_table(pa.Table.from_pylist(records,schema=_schema()),f)
+    sample=m13b.build_weighted_sample(tmp_path,rows=200,seed=99)
+    before=pq.read_table(sample["sample_file"])
+    validated=m13b.validate_holdout_margins(tmp_path,minimum_published=100)
+    after=pq.read_table(sample["sample_file"])
+    assert before.equals(after)  # heldout data never change training/sampled records
+    assert validated["validation_status"]=="independent_heldout_source_checks_completed_not_vehicle_truth"
+    assert len(validated["heldout_validation"])==3
+    for metric in validated["heldout_validation"]:
+        assert metric["holdout_used_for_fitting"] is False
+        assert metric["published_cells_above_threshold"]==2
+        assert metric["published_cells_unsupported_in_sample"]==0
+        assert metric["absolute_percentage_error_on_thresholded_cells"]==pytest.approx(0,abs=1e-9)
+    assert validated["heldout_validation"][0]["older_cohorts_on_thresholded_cells"]["before_1980"]["published_cells"]==1
