@@ -3,9 +3,6 @@ name: M1.4a official-source model diagnostics and Monte Carlo sensitivity
 # Heavy validation samples are intentionally not part of routine CI.
 # The first PR execution runs once; future runs are manual.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-4a-real-pilot.yml"
   workflow_dispatch:
 
 permissions:
