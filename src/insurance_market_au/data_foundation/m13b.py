@@ -50,7 +50,7 @@ HOLDOUT_SPECS = {
     "B26-16": ("vehicle_type", "registered_state", "registered_postcode", "manufacture_year", "make"),
     "B26-17": ("vehicle_type", "registered_state", "registered_postcode", "motive_power", "make", "model"),
 }
-VERSION = "m13b-conditional-v1"
+VERSION = "m13b-conditional-v2"
 SEED = 20261121
 MINIMUM_SAMPLE = 64008
 PATH_DB = "data/processed/m13b/conditionals.sqlite"
@@ -178,6 +178,11 @@ def prepare_conditionals(root: Path = ROOT, *, rebuild: bool = False) -> dict:
                     scope = _key(values[:len(scope_dims)])
                     choice = _key(values[len(scope_dims):])
                     inserts.append((pid, scope, choice, mass))
+                    if pid == "B26-09":
+                        # State × type garaging fallback, derived ONLY from
+                        # the same garaging-postcode publisher projection.
+                        inserts.append(("B26-09-ST", _key(values[:2]),
+                                        _key(values[3:]), mass))
                 con.executemany("INSERT INTO conditional VALUES(?,?,?,?)", inserts)
                 read_rows += len(inserts)
             observed[pid] = {
@@ -333,6 +338,12 @@ class ConditionalSampler:
         choice = self.draw("B26-09", (state, klass, fuel))
         if choice:
             return str(choice[0][0])
+        # Never equate registration to garaging. Use only a broader
+        # garaging marginal from B26-09 when the fuel cell is absent.
+        fallback = self.draw("B26-09-ST", (state, klass))
+        if fallback:
+            self.fallbacks["garaging_postcode_state_type_fallback"] += 1
+            return str(fallback[0][0])
         self.fallbacks["garaging_postcode_unknown"] += 1
         return "UNSPECIFIED"
 

@@ -23,7 +23,7 @@ Separate BITRE source projections support the extra attributes:
 | B26-08 | state/class/year × registration postcode | age-conditioned registration postcode |
 | B26-06 | state/class/fuel × registration postcode | fuel-conditioned registration postcode |
 | B26-04 | state/class × registration postcode | broad registration-postcode fallback |
-| B26-09 | state/class/fuel × garaging postcode | separate garaging postcode |
+| B26-09 | state/class/fuel × garaging postcode | separate garaging postcode, with same-source state/class fallback for missing fuel cells |
 
 Every source is checked against its pinned 2026 release SHA, reference date, source row order, expected physical rows, and national published detail sums, before indexing it separately in local SQLite. All publisher total rows are excluded. A published numeric zero does not mean a genuine structural zero. Fallbacks for missing conditional groups are recorded in the validation report.
 

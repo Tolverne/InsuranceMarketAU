@@ -234,3 +234,17 @@ def test_three_heldouts_are_diagnostic_only_and_leave_generated_rows_unchanged(t
         assert metric["published_cells_unsupported_in_sample"]==0
         assert metric["absolute_percentage_error_on_thresholded_cells"]==pytest.approx(0,abs=1e-9)
     assert validated["heldout_validation"][0]["older_cohorts_on_thresholded_cells"]["before_1980"]["published_cells"]==1
+
+
+def test_garaging_fallback_stays_in_same_published_geography_role(tmp_path, monkeypatch):
+    pytest.importorskip("pyarrow")
+    install_fixtures(tmp_path, monkeypatch)
+    m13b.prepare_conditionals(tmp_path)
+    sampler = m13b.ConditionalSampler(tmp_path/m13b.PATH_DB, 1)
+    try:
+        assert sampler.garage("NSW", "Passenger vehicles", "Hydrogen") == "2080"
+        assert sampler.fallbacks["garaging_postcode_state_type_fallback"] == 1
+        assert sampler.garage("Unknown state", "Passenger vehicles", "Hydrogen") == "UNSPECIFIED"
+        assert sampler.fallbacks["garaging_postcode_unknown"] == 1
+    finally:
+        sampler.close()
