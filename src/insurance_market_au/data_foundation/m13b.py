@@ -523,3 +523,116 @@ def build_weighted_sample(root: Path = ROOT, *, rows: int = 220000,
     }
     _atomic_json(root / PATH_REPORT, report)
     return report
+
+
+def validate_holdout_margins(
+    root: Path = ROOT, *, minimum_published: int = 100,
+) -> dict:
+    """Evaluate *without tuning* the model on three separately published projections.
+
+    For the 3.1m-row and 2.1m-row sources, metrics are restricted to
+    originally published cells with counts >= minimum_published, rather than
+    claiming the 220k synthetic POC represents every suppressed small cell.
+    The three holdout source files are never consulted for conditional
+    sampling or the source index.
+    """
+    if minimum_published < 1:
+        raise ValueError("Only positive-count holdout cells may be compared")
+    _, pq = _require_pyarrow()
+    data_file = root / PATH_ROWS
+    report_file = root / PATH_REPORT
+    if not data_file.is_file() or not report_file.is_file():
+        raise FileNotFoundError("Run the M1.3b weighted-sample build before validation")
+    report = json.loads(report_file.read_text(encoding="utf-8"))
+    if (report.get("status") != "weighted_synthetic_analytic_POC_not_fleet_release"
+        or set(report["training_projections"]) & set(HOLDOUT_SPECS)):
+        raise ValueError("M1.3b training/holdout isolation contract failed")
+    sources = {x["projection_id"]: x for x in load_bitre_catalog(root)}
+    sample = pq.ParquetFile(data_file)
+    dimensions = set(v for cols in HOLDOUT_SPECS.values() for v in cols)
+    if not dimensions <= set(sample.schema_arrow.names):
+        raise ValueError("M1.3b synthetic sample lacks holdout comparison dimensions")
+    estimates = {pid: defaultdict(float) for pid in HOLDOUT_SPECS}
+    total = 0.0
+    rows = 0
+    for batch in sample.iter_batches(batch_size=25000,
+                                     columns=[*sorted(dimensions), "expected_vehicle_weight","is_synthetic"]):
+        data = batch.to_pydict()
+        for i in range(batch.num_rows):
+            if not data["is_synthetic"][i]:
+                raise ValueError("M1.3b holdout validation must not use actual vehicles")
+            mass = data["expected_vehicle_weight"][i]
+            if mass is None or not math.isfinite(mass) or mass <= 0:
+                raise ValueError("Invalid simulated expected mass")
+            rows += 1
+            total += mass
+            for pid, cols in HOLDOUT_SPECS.items():
+                key = tuple(data[c][i] for c in cols)
+                estimates[pid][key] += mass
+    if rows != report["rows"] or abs(total - TOTAL) > 0.1:
+        raise ValueError("Model/validation sample total or row count changed")
+    checks = []
+    for pid, columns in HOLDOUT_SPECS.items():
+        print(f"[M1.3b] Validating held-out published source {pid}", flush=True)
+        published_cells = 0
+        supported_cells = 0
+        unsupported_cells = 0
+        observed_mass = 0.0
+        predicted_mass_on_published_cells = 0.0
+        absolute_error = 0.0
+        vintage = {"before_1980": [0.0,0.0,0], "before_1990":[0.0,0.0,0],
+                   "before_2000":[0.0,0.0,0]}
+        source = sources[pid]
+        for batch in _source_rows(source, columns, root=root):
+            for key, observed in batch:
+                if observed < minimum_published:
+                    continue
+                published_cells += 1
+                prediction = estimates[pid].get(key, 0.0)
+                observed_mass += observed
+                predicted_mass_on_published_cells += prediction
+                error = abs(observed - prediction)
+                absolute_error += error
+                if key in estimates[pid]:
+                    supported_cells += 1
+                else:
+                    unsupported_cells += 1
+                if "manufacture_year" in columns:
+                    field = key[columns.index("manufacture_year")]
+                    if isinstance(field, str) and len(field) == 4 and field.isdecimal():
+                        year = int(field)
+                        for limit in (1980, 1990, 2000):
+                            if year < limit:
+                                accumulator = vintage[f"before_{limit}"]
+                                accumulator[0] += observed
+                                accumulator[1] += error
+                                accumulator[2] += 1
+        checks.append({
+            "source_id":pid,
+            "source_sha256":source["sha256"],
+            "published_holdout_dimensions":list(columns),
+            "count_threshold_for_this_metric":minimum_published,
+            "published_cells_above_threshold":published_cells,
+            "published_cells_covered_by_sample":supported_cells,
+            "published_cells_unsupported_in_sample":unsupported_cells,
+            "sum_published_counts_on_thresholded_cells":observed_mass,
+            "sum_sample_expected_on_same_published_cells":predicted_mass_on_published_cells,
+            "absolute_percentage_error_on_thresholded_cells":(
+                absolute_error/observed_mass if observed_mass else None
+            ),
+            "older_cohorts_on_thresholded_cells":{
+                k:{"source_count":v[0],"WAPE":v[1]/v[0] if v[0] else None,
+                   "published_cells":v[2]} for k,v in vintage.items()
+            },
+            "holdout_used_for_fitting":False,
+            "note":(
+                "Diagnostic only: disclosure-adjusted published high-count cells "
+                "vs a finite Monte Carlo weighted synthetic sample. Large errors "
+                "are possible especially in rare model-year/postcode intersections. "
+                "Not a measured error rate against physical vehicles."
+            ),
+        })
+    report["heldout_validation"] = checks
+    report["validation_status"] = "independent_heldout_source_checks_completed_not_vehicle_truth"
+    _atomic_json(report_file, report)
+    return report
