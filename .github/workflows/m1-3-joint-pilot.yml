@@ -1,0 +1,100 @@
+name: M1.3a national calibrated joint validation pilot
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/data_foundation/m13.py"
+      - "scripts/m13_fit.py"
+      - "tests/test_m13_calibration.py"
+      - "pyproject.toml"
+      - ".github/workflows/m1-3-joint-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  four-way-calibration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install source, model and test dependencies
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Test synthetic calibration, validation isolation and deterministic samples
+        run: python -m pytest -q tests/test_m13_calibration.py
+      - name: Download official benchmark workbook, three training projections and one excluded holdout
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 8f7a9a86-130e-4d97-8a91-1bef302c27c9 --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 16b61938-22e8-4c85-b067-c3ecd63ca05f --download
+          python scripts/download_vehicle_sources.py --groups bitre --only be196cd3-7196-4da8-b18a-13e7576fb9ee --download
+          python scripts/download_vehicle_sources.py --groups bitre --only b29bd94e-2789-455b-a0f3-7a06ca397be5 --download
+      - name: Extract authoritative workbook state/class controls
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from insurance_market_au.data_foundation.m11_controls import find_workbook,extract_workbook_controls,write_controls
+          c=extract_workbook_controls(find_workbook())
+          assert c['national_total']==22771150
+          write_controls(c,Path('data/processed/m1/controls'))
+          PY
+      - name: Stage exactly the four verified 2026 BITRE projections
+        run: |
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03,B26-10 --parquet
+      - name: Fit initial synthetic joint and evaluate heldout B26-10
+        run: |
+          python scripts/m13_fit.py --iterations 32 --sample-size 2000 --seed 20261121
+      - name: Assert operating controls, independence and output validity
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          import pyarrow.parquet as pq
+          r=json.loads(Path('data/reports/m13/pilot-validation.json').read_text())
+          assert r['published_total_operational_anchor']==22771150
+          assert r['training_sources']==['B26-01','B26-02','B26-03']
+          assert r['holdout_source']=='B26-10'
+          assert r['holdout_excluded_from_training_support_fitting_and_tuning']
+          assert r['joint_support_cells']>1000
+          assert abs(r['sum_expected_synthetic_vehicles']-22771150)<0.001
+          assert r['fit']['maximum_operational_control_error']<0.00001
+          assert r['initial_holdout']['trained_on_holdout'] is False
+          assert r['fitted_holdout']['trained_on_holdout'] is False
+          assert math.isfinite(r['fitted_holdout']['overall_published_cell_wape'])
+          # Pinned-release reproducibility gates; NOT universal statistical
+          # disclosure bounds or individual-car prediction guarantees.
+          assert r['fitted_holdout']['overall_published_cell_wape'] < r['initial_holdout']['overall_published_cell_wape']
+          assert r['fitted_holdout']['overall_published_cell_wape'] < 0.05
+          older=r['heldout_segment_diagnostics']['age_cohorts']
+          assert older['manufactured_before_1980']['published_cell_WAPE'] < 0.10
+          assert older['manufactured_before_1990']['published_cell_WAPE'] < 0.10
+          assert older['manufactured_before_2000']['published_cell_WAPE'] < 0.10
+          print('M13_OLD_VEHICLE_VALIDATION', {k:v['published_cell_WAPE'] for k,v in older.items()})
+          joint=pq.read_table(r['expected_joint_parquet'])
+          assert joint.num_rows==r['joint_support_cells']
+          assert set(['registered_state','vehicle_type','manufacture_year','motive_power']).issubset(joint.column_names)
+          assert 'VIN' not in joint.column_names
+          sample=pq.read_table(r['synthetic_sample_parquet'])
+          assert sample.num_rows==2000
+          assert all(sample['is_synthetic'].to_pylist())
+          print('M13_PILOT_SUCCESS','joint_cells',r['joint_support_cells'],
+                'baseline_holdout_WAPE',r['initial_holdout']['overall_published_cell_wape'],
+                'fitted_holdout_WAPE',r['fitted_holdout']['overall_published_cell_wape'],
+                'holdout_ge100_WAPE',r['fitted_holdout']['wape_for_published_ge_100'])
+          for c in r['fit']['fitted_training_margins']:
+              print('M13_TRAIN',c['constraint'],c['groups'],
+                    'wape',c['published_count_wape'],
+                    'unsupported',c['unsupported_source_groups'])
+          PY
+      - name: Retain metadata-only validation report (no raw or synthetic rows)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m13-joint-pilot-validation-${{ github.run_id }}
+          path: data/reports/m13/pilot-validation.json
+          if-no-files-found: ignore
+          retention-days: 14

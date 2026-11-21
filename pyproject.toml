@@ -12,8 +12,10 @@ license = { text = "Proprietary / licence not yet selected" }
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "jsonschema>=4.22,<5"]
+dev = ["pytest>=8,<10", "jsonschema>=4.22,<5", "numpy>=2,<3"]
 data = ["pyarrow>=17,<25", "openpyxl>=3.1,<4"]
+model = ["numpy>=2,<3"]
+explore = ["streamlit>=1.40,<2", "pandas>=2.2,<3"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

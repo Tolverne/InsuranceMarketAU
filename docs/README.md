@@ -20,3 +20,5 @@
 - [M1.1 BITRE workbook controls and disclosure-aware reconciliation](data-foundation/m11-reconciliation.md)
 
 - [M1.2 State source harmonisation and quality gates](data-foundation/m12-harmonisation.md)
+
+- [M1.3a National synthetic joint calibration, heldout tests and local explorer](data-foundation/m13-calibration.md)
