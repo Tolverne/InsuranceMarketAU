@@ -1,0 +1,64 @@
+name: M1.1 full 17-source national BITRE audit
+
+# Large read-only evidence run. Subsequent full runs should be started by
+# workflow_dispatch rather than repeated on every normal code change.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-reconciliation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install M1.1 dependencies
+        run: python -m pip install -e ".[data,dev]"
+      - name: Acquire 17 official BITRE 2026 projections and workbook
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --download
+      - name: Stage all 17 BITRE projections in independent Parquet tables
+        run: |
+          python scripts/m1_ingest.py --parquet --batch-rows 20000
+      - name: Reconcile full staged source set
+        run: |
+          python scripts/m11_reconcile.py --no-detailed-csv --batch-size 32768
+      - name: Validate global accounting and source coverage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path('data/reports/m1')
+          controls=json.loads(Path('data/processed/m1/controls/bitre-2026-table1-controls.json').read_text())
+          report=json.loads((d/'bitre-2026-m11-full-reconciliation.json').read_text())
+          assert controls['national_total']==22771150
+          assert len(controls['controls'])==99
+          assert report['complete_17']
+          assert report['sources_analysed']==17
+          assert all(p['published_detail_numeric_total']==22771150 for p in report['source_summaries'])
+          assert sum(p['source_rows'] for p in report['source_summaries'])==12181645
+          assert report['comparison_count']>10
+          print('M11_FULL_AUDIT', 'sources',report['sources_analysed'],
+                'comparisons',report['comparison_count'],
+                'with_nonzero_residuals',report['comparison_nonzero_count'])
+          for margin in sorted(set(p['margin'] for p in report['comparisons'])):
+              rows=[p for p in report['comparisons'] if p['margin']==margin]
+              print('M11_FULL_MARGIN',margin,'comparisons',len(rows),
+                    'max_abs',max((p['maximum_abs_difference'] or 0) for p in rows),
+                    'nonzero_source_pairs',sum(p['nonzero_differences']>0 for p in rows))
+          PY
+      - name: Retain safe audit summary (no raw files or full detailed cell residuals)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m11-complete-summary-${{ github.run_id }}
+          path: |
+            data/reports/m1/bitre-2026-m11-full-reconciliation.json
+            data/processed/m1/controls/bitre-2026-table1-controls.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,77 @@
+name: M1.1 real BITRE workbook control + margin pilot
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/data_foundation/m11_*.py"
+      - "src/insurance_market_au/data_foundation/m1.py"
+      - "scripts/m11_reconcile.py"
+      - "tests/test_m11_controls.py"
+      - "pyproject.toml"
+      - ".github/workflows/m1-1-reconcile-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install workbook and Parquet packages
+        run: python -m pip install -e ".[data,dev]"
+      - name: Run M1.1 source fixtures and governance tests
+        run: pytest -q tests/test_m11_controls.py tests/test_m1_physical_schemas.py
+      - name: Acquire official workbook and three real source cross-tabs
+        run: |
+          python scripts/download_vehicle_sources.py --groups bitre --only bitre_summary --static-only --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 8f7a9a86-130e-4d97-8a91-1bef302c27c9 --download
+          python scripts/download_vehicle_sources.py --groups bitre --only 16b61938-22e8-4c85-b067-c3ecd63ca05f --download
+          python scripts/download_vehicle_sources.py --groups bitre --only be196cd3-7196-4da8-b18a-13e7576fb9ee --download
+      - name: Stage three independently grained cross-tabs as Parquet
+        run: |
+          python scripts/m1_ingest.py --selected B26-01,B26-02,B26-03 --parquet
+      - name: Extract workbook controls and reconcile real cross-projection margins
+        run: |
+          python scripts/m11_reconcile.py --selected B26-01,B26-02,B26-03
+      - name: Assert audited published controls and residual semantics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          base=Path('data/reports/m1')
+          c=json.loads(Path('data/processed/m1/controls/bitre-2026-table1-controls.json').read_text())
+          r=json.loads((base/'bitre-2026-m11-pilot-reconciliation.json').read_text())
+          assert c['national_total']==22771150
+          assert len(c['controls'])==99
+          assert r['sources_analysed']==3
+          assert r['national_workbook_control']==22771150
+          assert r['comparison_count']>0
+          assert not r['complete_17']
+          assert all(s['published_detail_numeric_total']==22771150 for s in r['source_summaries'])
+          print('M11_LIVE_SOURCES',r['sources_analysed'])
+          print('M11_LIVE_CONTROLS',len(c['controls']))
+          print('M11_LIVE_COMPARISONS',r['comparison_count'])
+          print('M11_LIVE_BOOK_DISCREPANCIES', sum(x['delta_sum_minus_published']!=0 for x in c['internal_consistency']))
+          for row in r['comparisons']:
+              print('M11_MARGIN',row['margin'],row['candidate'],
+                    'matched',row['matched_comparable_groups'],
+                    'nonzero',row['nonzero_differences'],
+                    'p95',row['p95_abs_difference'],
+                    'max',row['maximum_abs_difference'])
+          PY
+      - name: Preserve safe source audit reports only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m11-real-pilot-manifest-${{ github.run_id }}
+          path: |
+            data/reports/m1/bitre-2026-m11-pilot-reconciliation.json
+            data/processed/m1/controls/bitre-2026-table1-controls.json
+          if-no-files-found: ignore
+          retention-days: 14

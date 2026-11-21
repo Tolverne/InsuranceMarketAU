@@ -13,7 +13,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "jsonschema>=4.22,<5"]
-data = ["pyarrow>=17,<25"]
+data = ["pyarrow>=17,<25", "openpyxl>=3.1,<4"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

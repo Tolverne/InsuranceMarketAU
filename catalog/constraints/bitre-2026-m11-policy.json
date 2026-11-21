@@ -1,0 +1,52 @@
+{
+  "policy_version": "0.1.0",
+  "release": "BITRE Road vehicles Australia January 2026",
+  "observation_date": "2026-01-31",
+  "population_unit": "registered motor vehicles for unrestricted road use, not insurance policy/cover exposures",
+  "publisher_summary": {
+    "source_file": "BITRE summary workbook / Table 1",
+    "reference_total": 22771150,
+    "status": "published_high_priority_accounting_anchor",
+    "operational_interpretation": "Reconstructed population must preserve the reported top-level fleet total by design, without treating this as vehicle-level truth.",
+    "formal_exact_statistical_constraint": false
+  },
+  "state_class_controls": {
+    "source": "Table 1: eight states and territories by ten motor vehicle types",
+    "status": "published_benchmark_candidates",
+    "decision": "Retain all 80 source cell values, preserve publisher sources and additivity residuals; decide hard/soft treatment only after consistency review.",
+    "formal_exact_statistical_constraint": false
+  },
+  "detailed_margins": {
+    "source": "17 distinct BITRE detailed CSV projections",
+    "status": "disclosure_affected_soft_constraint_candidates",
+    "published_disclosure_rules": [
+      "Publisher suppresses small-count cells fewer than three",
+      "Additional secondary cells, including totals, may be perturbed or suppressed",
+      "Summing cell values may differ from published totals"
+    ],
+    "unknown_or_absent_key": "not_observed_not_zero",
+    "numeric_zero": "observed_disclosure_adjusted_zero_not_proof_of_structural_zero",
+    "numeric_positive": "published_perturbed_or_otherwise_confidentialised_estimate",
+    "strict_tolerance": "none_approved",
+    "optimizer_policy": "do_not_force_all_projected_cells_exact",
+    "regularization_or_likelihood": "pending_M1.3_research_and_validation"
+  },
+  "geography": {
+    "state": "jurisdiction of registration",
+    "registered_postcode": "postcode of registration",
+    "garaging_postcode": "reported garaging postcode, sometimes fallback to registered postcode",
+    "safety": "Never equate registration postcode to garaging postcode or assume their row-level linkage is observed."
+  },
+  "model_validation": {
+    "status": "not_yet_estimated",
+    "pairwise_margin_checks": "diagnostics only; not predictive holdout accuracy",
+    "holdout_plan": "Reserve independently published margins for M1.3 synthetic-joint predictive evaluation.",
+    "required_before_synthesis": [
+      "reconcile BITRE source universe and Table 1 published control hierarchy",
+      "review suppression/perturbation error model and acceptable constraints",
+      "identify sparse support before constructing joint feature distribution",
+      "review source licence/privacy and small-cell output decisions",
+      "demonstrate out-of-sample marginal accuracy and uncertainty ensembles"
+    ]
+  }
+}

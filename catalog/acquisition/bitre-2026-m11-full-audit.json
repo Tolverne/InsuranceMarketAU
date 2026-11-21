@@ -1,0 +1,90 @@
+{
+  "report_version": "0.1.0",
+  "evidence": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44847246292",
+  "dataset": "BITRE Road vehicles Australia January 2026",
+  "reference_date": "2026-01-31",
+  "summary_workbook_sha256": "e35996e412c58cdfd8ecf30d686bb852e4efd56b5cfbb9521af9b7cbda307e81",
+  "number_of_independent_projections": 17,
+  "total_published_aggregate_rows_across_projections": 12181645,
+  "count_of_published_numeric_zero_rows_across_projections": 4177485,
+  "count_of_nonnumeric_count_rows": 0,
+  "source_universe_population_published_total": 22771150,
+  "table1_control_cells": 99,
+  "table1_internal_nonzero_additivity_checks": 0,
+  "number_of_pairwise_margin_comparisons": 47,
+  "number_of_pairs_with_at_least_one_nonzero_residual": 47,
+  "comparable_margins": [
+    {
+      "margin": "state_vehicle_type",
+      "comparison_count": 11,
+      "maximum_abs_difference": 6382,
+      "anchor_source": "workbook_table1",
+      "source_of_max_difference": "B26-17",
+      "maximum_pair_top_relative_abs_percent": 0.133743
+    },
+    {
+      "margin": "type_motive_power",
+      "comparison_count": 7,
+      "maximum_abs_difference": 8867,
+      "anchor_source": "B26-02",
+      "source_of_max_difference": "B26-17",
+      "maximum_pair_top_relative_abs_percent": 0.070308
+    },
+    {
+      "margin": "type_manufacture_year",
+      "comparison_count": 7,
+      "maximum_abs_difference": 1640,
+      "anchor_source": "B26-01",
+      "source_of_max_difference": "B26-16",
+      "maximum_pair_top_relative_abs_percent": 0.175358
+    },
+    {
+      "margin": "state_type_motive_power",
+      "comparison_count": 4,
+      "maximum_abs_difference": 4235,
+      "anchor_source": "B26-03",
+      "source_of_max_difference": "B26-17",
+      "maximum_pair_top_relative_abs_percent": 0.113933
+    },
+    {
+      "margin": "state_type_manufacture_year",
+      "comparison_count": 4,
+      "maximum_abs_difference": 596,
+      "anchor_source": "B26-01",
+      "source_of_max_difference": "B26-16",
+      "maximum_pair_top_relative_abs_percent": 0.207971
+    },
+    {
+      "margin": "type_registered_postcode",
+      "comparison_count": 6,
+      "maximum_abs_difference": 133,
+      "anchor_source": "B26-04",
+      "source_of_max_difference": "B26-13",
+      "maximum_pair_top_relative_abs_percent": 0.510792
+    },
+    {
+      "margin": "type_garaging_postcode",
+      "comparison_count": 1,
+      "maximum_abs_difference": 95,
+      "anchor_source": "B26-09",
+      "source_of_max_difference": "B26-12",
+      "maximum_pair_top_relative_abs_percent": 1.577025
+    },
+    {
+      "margin": "type_make_model",
+      "comparison_count": 7,
+      "maximum_abs_difference": 257,
+      "anchor_source": "B26-05",
+      "source_of_max_difference": "B26-17",
+      "maximum_pair_top_relative_abs_percent": 2.284241
+    }
+  ],
+  "limitations": [
+    "Aggregated rows from 17 overlapping views are NOT 12.18 million individual motor vehicles.",
+    "Numeric zero rows may reflect confidentiality treatment; no count of underlying suppressed individual vehicles can be inferred from their number.",
+    "Maximum differences are across compared published margins, not model prediction errors or per-cell confidence intervals.",
+    "Do not merge or calibrate all sources to exact equality without a documented disclosure-aware model.",
+    "State/class workbook totals are publisher estimates, high-priority accounting anchors, not observed microdata."
+  ],
+  "status": "source_audit_passed_with_material_segment_residuals_requiring_M1.3_review"
+}
