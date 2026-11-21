@@ -224,3 +224,19 @@ def test_coverage_matrix_preserves_bitre_only_jurisdictions(tmp_path:Path):
         assert by[state]["bitre_2026_01_registered_motor_vehicles"]>0
     assert by["Vic"]["stock_source_ids"]==[sid]
     assert not by["Vic"]["approved_bitre_class_crosswalk"]
+
+
+def test_two_vic_projections_can_reconcile_totals_without_row_join(tmp_path:Path):
+    root_fixture(tmp_path)
+    postcode=("CD_MAKE_VEH1,CD_CLASS_VEH,NB_YEAR_MFC_VEH,POSTCODE,CD_CL_FUEL_ENG,TOTAL1\n"
+              "VOLVO,2,2021,4000,D,4\n").encode()
+    model=("CD_MAKE_VEH1,CD_MODEL_VEH,CD_CLR_BDY_VEH_P,TOTAL1\n"
+           "VOLVO,XC60,White,4\n").encode()
+    acquired(tmp_path,"vic_postcode_q3_2026","vic","2026-09-30",postcode)
+    acquired(tmp_path,"vic_model_q3_2026","vic","2026-09-30",model)
+    r=run_m12(root=tmp_path,groups={"vic"},fail_on_error=True)
+    assert r["within_publisher_checks"][0]["status"]=="published_aggregate_counts_agree"
+    assert r["within_publisher_checks"][0]["delta_model_minus_postcode"]==0
+    assert r["within_publisher_checks"][0]["not_a_vehicle_row_join"]
+    pilot=run_m12(root=tmp_path,groups={"vic"},limit_rows=1,fail_on_error=True)
+    assert pilot["within_publisher_checks"][0]["status"]=="not_evaluated_partial_sample"

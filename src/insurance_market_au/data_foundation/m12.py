@@ -500,6 +500,56 @@ def _atomic_json(path: Path,obj: Any) -> None:
         temp.unlink(missing_ok=True)
 
 
+def same_publisher_cross_projection_checks(profiles: list[dict]) -> list[dict]:
+    """Compare like-vintage *totals* without claiming a vehicle-level row join.
+
+    Excludes partial/sampled profiles, suppressed/unbounded aggregates and
+    unrelated publication scopes. At present the only approved descriptive
+    check is VIC's two Q3 2026 whole-fleet tables. No numeric equality is
+    imposed as a national calibration constraint.
+    """
+    by_id={p["source_id"]:p for p in profiles}
+    first=by_id.get("vic_postcode_q3_2026")
+    second=by_id.get("vic_model_q3_2026")
+    if first is None or second is None:
+        return []
+    if first["sample_limit_per_member"] is not None or second["sample_limit_per_member"] is not None:
+        return [{
+            "check_id":"vic_q3_2026_postcode_vs_model_total",
+            "status":"not_evaluated_partial_sample",
+            "not_a_vehicle_row_join":True
+        }]
+    if (first["observed_dates"].keys()!=second["observed_dates"].keys()
+            or set(first["observed_dates"])!={"2026-09-30"}):
+        return [{
+            "check_id":"vic_q3_2026_postcode_vs_model_total",
+            "status":"not_evaluated_date_mismatch",
+            "not_a_vehicle_row_join":True
+        }]
+    if (first["rows_without_finite_bounds"] or second["rows_without_finite_bounds"]
+            or first["censored_rows"] or second["censored_rows"]):
+        return [{
+            "check_id":"vic_q3_2026_postcode_vs_model_total",
+            "status":"not_evaluated_non_exact_published_cell_bounds",
+            "not_a_vehicle_row_join":True
+        }]
+    left=first["count_sum_numeric"]
+    right=second["count_sum_numeric"]
+    return [{
+        "check_id":"vic_q3_2026_postcode_vs_model_total",
+        "status":"published_aggregate_counts_agree" if left==right else "published_aggregate_counts_differ",
+        "date":"2026-09-30",
+        "postcode_source":"vic_postcode_q3_2026",
+        "model_source":"vic_model_q3_2026",
+        "postcode_published_cell_sum":left,
+        "model_published_cell_sum":right,
+        "delta_model_minus_postcode":right-left,
+        "not_a_vehicle_row_join":True,
+        "not_approved_bitre_2026_01_control":True,
+        "interpretation":"Two separate publisher projections at the same source date; equal totals do not identify the joint distribution."
+    }]
+
+
 def build_coverage_matrix(report: dict) -> dict:
     """Make every jurisdiction's BITRE baseline and supplemental evidence explicit.
 
@@ -602,6 +652,7 @@ def run_m12(*,root:Path=ROOT,groups:set[str] | None=None,parquet:bool=False,
         "all_source_rows_processed":sum(x["source_rows"] for x in profiles),
         "states_without_new_granular_files":cfg["missing_jurisdiction_policy"],
         "warnings_policy":"NSW age quarantined, ACT requires manual original source, SA mirror non-additive, QLD 2022 historical; no direct comparison to Jan 2026 BITRE",
+        "within_publisher_checks":same_publisher_cross_projection_checks(profiles),
     }
     path=root/"data/reports/m12"/("source-profile-sample.json" if limit_rows is not None
                                  else "source-profile.json")
