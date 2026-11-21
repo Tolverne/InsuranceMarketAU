@@ -14,6 +14,8 @@ from insurance_market_au.data_foundation.m12 import (
 
 def root_fixture(root:Path)->dict:
     config=load_registry()
+    for source in config["sources"]:
+        source.pop("expected_sha256",None)  # Synthetic source bytes never mimic the real publisher release.
     f=root/"catalog/harmonization/m12-sources.json"
     f.parent.mkdir(parents=True)
     f.write_text(json.dumps(config),encoding="utf-8")
@@ -253,3 +255,14 @@ def test_requested_but_missing_source_not_silently_complete(tmp_path:Path):
                and x["status"]=="requested_source_missing" for x in result["notices"])
     pilot=run_m12(root=tmp_path,groups={"vic"},only_source=sid,fail_on_error=True)
     assert pilot["source_inventory_requested_subset"]
+
+
+def test_verified_primary_publisher_contract_pins_are_present():
+    cfg=load_registry()
+    sources={x.get("id"):x for x in cfg["sources"] if x.get("id")}
+    for name in ("vic_postcode_q3_2026","vic_model_q3_2026",
+                 "nsw_registrations_2026","nsw_usage_2026","nsw_heavy_2026",
+                 "nsw_transactions_2026","act_make_model_suburb"):
+        assert len(sources[name]["expected_sha256"])==64
+    assert next(s for s in cfg["sources"]
+                if s.get("id_prefix")=="sa_registered_postcode_2026__")["expected_sha256"].startswith("a9674fec")

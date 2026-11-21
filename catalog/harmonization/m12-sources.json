@@ -37,7 +37,8 @@
         "CD_CL_FUEL_ENG",
         "TOTAL1"
       ],
-      "tier": "candidate_state_support"
+      "tier": "candidate_state_support",
+      "expected_sha256": "085843370244ffc3b956e82564edd62bbc0ebd5dde87932da8c9eab4e73c42ac"
     },
     {
       "id": "vic_model_q3_2026",
@@ -63,7 +64,8 @@
         "CD_CLR_BDY_VEH_P",
         "TOTAL1"
       ],
-      "tier": "candidate_state_support"
+      "tier": "candidate_state_support",
+      "expected_sha256": "1bce46ee689bc2195649d84e354d9bce18015c6d5daa88f3650dbf85c1594572"
     },
     {
       "id": "nsw_registrations_2026",
@@ -99,7 +101,8 @@
         "CUSTOMER ADDRESS LGA",
         "COUNT"
       ],
-      "tier": "censored_stock_support"
+      "tier": "censored_stock_support",
+      "expected_sha256": "07bb46c18f741311c6db19b20fe06b99eb0afb1c526ec7646778fc031ab2b567"
     },
     {
       "id": "nsw_age_2026",
@@ -145,7 +148,8 @@
         "CUSTOMER ADDRESS LGA",
         "COUNT"
       ],
-      "tier": "censored_stock_support"
+      "tier": "censored_stock_support",
+      "expected_sha256": "d8c389fd3b88158af0fe17319fbdd6a27726c18a825533692a8a695cdd6782e6"
     },
     {
       "id": "nsw_heavy_2026",
@@ -172,7 +176,8 @@
         "CUSTOMER ADDRESS LGA",
         "COUNT"
       ],
-      "tier": "subset_stock_support"
+      "tier": "subset_stock_support",
+      "expected_sha256": "a7add6b6a59095a8df97bab4173c5bf9dd4a31c025be1e16d6b6d7a6f7ced981"
     },
     {
       "id": "nsw_transactions_2026",
@@ -206,7 +211,8 @@
         "CUSTOMER ADDRESS LGA",
         "COUNT"
       ],
-      "tier": "flow_only"
+      "tier": "flow_only",
+      "expected_sha256": "96b94ba336042a0c7025c50623f99a10e253db9a859a0f16c6a2f089185940fe"
     },
     {
       "id_prefix": "sa_registered_postcode_2026__",
@@ -237,7 +243,8 @@
         "Total(TOTAL_VEHICLES)"
       ],
       "tier": "candidate_state_support",
-      "auxiliary_total_col": "Total(TOTAL_VEHICLES)"
+      "auxiliary_total_col": "Total(TOTAL_VEHICLES)",
+      "expected_sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235"
     },
     {
       "id": "sa_original_2026_mirror",
@@ -268,7 +275,8 @@
         "Total(TOTAL_VEHICLES)"
       ],
       "tier": "fallback_only",
-      "auxiliary_total_col": "Total(TOTAL_VEHICLES)"
+      "auxiliary_total_col": "Total(TOTAL_VEHICLES)",
+      "expected_sha256": "a9674fec939a99f128ce8571629aa00fe6363264b58dfb63a56b97bdc7379235"
     },
     {
       "id": "act_make_model_suburb",
@@ -299,7 +307,8 @@
       "tier": "censored_stock_support",
       "date_col": "Data as at",
       "manual_sha256": "6c74e748699ceb61c9a9b69f9bb4a7e5ce012307cbdd3db1525de9b29eab7a2d",
-      "manual_filename": "act-make-model-suburb-manual.csv"
+      "manual_filename": "act-make-model-suburb-manual.csv",
+      "expected_sha256": "6c74e748699ceb61c9a9b69f9bb4a7e5ce012307cbdd3db1525de9b29eab7a2d"
     },
     {
       "id_prefix": "qld_registration_2022__",

@@ -328,6 +328,10 @@ def scan_source(item: dict, *, root: Path=ROOT,
     actual_sha=sha256_file(p)
     if actual_sha.lower()!=acquired["sha256"].lower():
         raise ValueError(f"Source SHA drift: {item['source_id']}. Halt before parsing.")
+    expected_sha=spec.get("expected_sha256")
+    if expected_sha is not None and actual_sha.lower()!=expected_sha.lower():
+        raise ValueError(f"Source differs from approved M1.2 publisher release: {item['source_id']}; "
+                         "review and version the source contract before ingestion")
     expected_ext="."+spec["format"]
     if p.suffix.lower()!=expected_ext:
         raise ValueError(f"{p}: wrong extension for declared {spec['format']}")
@@ -347,6 +351,7 @@ def scan_source(item: dict, *, root: Path=ROOT,
         "reference_date_policy":spec["date_policy"],"publisher_reference":spec["date"],
         "geography_role":spec["geography_role"],"scope":spec["scope"],
         "source_sha256":actual_sha,"source_bytes":p.stat().st_size,
+        "pinned_publisher_sha_verified":spec.get("expected_sha256") is not None,
         "source_path":str(p),"manual_acquisition":bool(item["manual"]),
         "license_status":"pending_individual_source_review",
         "source_rows":0,"source_members":0,"numeric_rows":0,
