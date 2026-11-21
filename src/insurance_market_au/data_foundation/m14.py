@@ -179,6 +179,8 @@ def read_sample_predictions(
     return dict(predicted), {
         "sample_sha256": sha256_file(sample_path),
         "sample_file": str(sample_path),
+        "sample_size_bytes": sample_path.stat().st_size,
+        "sample_mtime_ns": sample_path.stat().st_mtime_ns,
         "sample_report": str(sample_report),
         "sample_rows": row_count,
         "seed": report["seed"],

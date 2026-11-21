@@ -33,10 +33,23 @@ else:
         return json.loads(Path(path).read_text(encoding="utf-8"))
 
     report = _load(str(REPORT), REPORT.stat().st_mtime_ns)
+    sample_record = report.get("sample", {})
+    linked_sample = Path(sample_record.get("sample_file", ""))
+    sample_stale = (
+        not linked_sample.is_file()
+        or linked_sample.stat().st_size != sample_record.get("sample_size_bytes")
+        or linked_sample.stat().st_mtime_ns != sample_record.get("sample_mtime_ns")
+    )
     if (report.get("pipeline") != "m14a-independent-validation-v1"
         or report.get("population_release_created") is not False
         or report.get("source_margins_recalibrated") is not False):
         st.error("Unexpected validation report contract — do not interpret these diagnostics.")
+    elif sample_stale:
+        st.error(
+            "This validation report refers to a different synthetic sample. "
+            "Run py -3 scripts/m14_validate.py after regenerating M1.3b, "
+            "then refresh the explorer."
+        )
     else:
         summary = report["metrics"]["overall"]
         sample = report["sample"]
