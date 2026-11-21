@@ -166,3 +166,26 @@ def test_predeclared_governance_policy_matches_training_only_code():
     assert settings["minimum_source_mass_coverage"]==pytest.approx(0.15)
     assert policy["release_gate"]["commercial_synthetic_population_approved"] is False
     assert policy["heldout_policy"]["tune_hyperparameters_to_heldout"] is False
+
+
+def test_real_pilot_evidence_pins_mixed_independent_results_and_no_release():
+    from insurance_market_au.data_foundation.m1 import ROOT, load_bitre_catalog
+    evidence=json.loads(
+        (ROOT/"catalog/calibration/m14b-verified-pilot.json").read_text(encoding="utf-8")
+    )
+    sources={x["projection_id"]:x for x in load_bitre_catalog(ROOT)}
+    assert evidence["model_version"]==m14b.VERSION
+    assert evidence["same_support_sample"]["fourway_control_cells"]==64008
+    assert evidence["same_support_sample"]["maximum_fourway_cell_mass_error"]<1e-5
+    for row in evidence["strictly_withheld_source_checks"]:
+        assert row["id"] in m13b.HOLDOUT_SPECS
+        assert row["sha256"]==sources[row["id"]]["sha256"]
+    by_id={x["id"]:x for x in evidence["strictly_withheld_source_checks"]}
+    assert by_id["B26-14"]["candidate_WAPE"] < by_id["B26-14"]["baseline_WAPE"]
+    for pid in ("B26-16","B26-17"):
+        assert by_id[pid]["candidate_WAPE"]>by_id[pid]["baseline_WAPE"]
+        assert by_id[pid]["published_cell_support_fraction"]<0.2
+    findings=evidence["model_research_findings"]
+    assert findings["registration_geographic_holdouts_improved"] is False
+    assert findings["automatic_population_promotion_approved"] is False
+    assert findings["statistical_individual_vehicle_accuracy_established"] is False

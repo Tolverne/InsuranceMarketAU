@@ -2,9 +2,6 @@ name: M1.4b real BITRE soft calibration and three independent holdouts
 
 # Heavy one-off PR source audit; subsequent runs should use workflow_dispatch.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-4b-real-pilot.yml"
   workflow_dispatch:
 
 permissions:
@@ -76,7 +73,6 @@ jobs:
           assert m['governance']['automatic_promotion_to_production'] is False
           assert m['governance']['model_disclosure_uncertainty_estimated'] is False
           assert len(v['comparison'])==3
-          assert v['holdout_not_used_for_hyperparameter_selection'] is False or v['holdout_not_used_for_hyperparameter_selection'] is True
           assert v['holdout_not_used_for_hyperparameter_selection'] is True
           baseline=pq.read_table(m['original_m13b_sample'])
           candidate=pq.read_table(m['calibrated_sample'])
