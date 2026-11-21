@@ -26,3 +26,5 @@
 - [M1.3b Make/model and postcode synthetic explorer](data-foundation/m13b-extension.md)
 
 - [M1.4a Independent validation and sampling sensitivity](data-foundation/m14-validation.md)
+
+- [M1.4b Soft conditional weight calibration and independent heldout evaluation](data-foundation/m14b-calibration.md)

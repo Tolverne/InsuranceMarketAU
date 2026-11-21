@@ -1,0 +1,56 @@
+{
+  "version": "0.1.0",
+  "milestone": "M1.4b",
+  "model_version": "m14b-soft-conditional-v1",
+  "trained_release": "BITRE Road vehicles Australia January 2026",
+  "reference_date": "2026-01-31",
+  "training_projection_order": [
+    "B26-15",
+    "B26-07",
+    "B26-05",
+    "B26-13",
+    "B26-08",
+    "B26-06",
+    "B26-04",
+    "B26-09"
+  ],
+  "strictly_heldout_projections": [
+    "B26-14",
+    "B26-16",
+    "B26-17"
+  ],
+  "predeclared_hyperparameters": {
+    "rounds": 4,
+    "relaxation": 0.35,
+    "update_cap": 1.6,
+    "relative_weight_cap_before_projection": 8,
+    "minimum_published_training_cell": 10,
+    "minimum_publisher_scope": 100,
+    "minimum_source_mass_coverage": 0.15
+  },
+  "hard_control": {
+    "original_fourway_state_type_year_fuel": true,
+    "max_calibrated_cell_error": 0.00001,
+    "national_expected_registrations": 22771150
+  },
+  "source_semantics": {
+    "suppressed_count_is_zero": false,
+    "published_numeric_zero_structural": false,
+    "registered_postcode_equals_garaging_postcode": false,
+    "published_margins_soft_not_exact_vehicle_counts": true
+  },
+  "heldout_policy": {
+    "tune_hyperparameters_to_heldout": false,
+    "holdout_only_after_fit": true,
+    "compare_on_identical_row_support": true,
+    "original_published_cell_threshold": 100
+  },
+  "release_gate": {
+    "commercial_synthetic_population_approved": false,
+    "auto_promote_weight_version": false,
+    "missing_key_support_reconstructed": false,
+    "model_uncertainty_interval_calibrated": false,
+    "pricing_api_integration_authorized": false
+  },
+  "notes": "Initial soft-raking engineering candidate; no guarantee of improved independent heldout accuracy. Published aggregates are confidentialised and may omit rare classic cars."
+}
