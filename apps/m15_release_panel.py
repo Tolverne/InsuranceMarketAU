@@ -129,5 +129,19 @@ else:
         )
         with st.expander("Quality gates and model limitations"):
             st.json(store.quality["quality_gates"])
+            observations=store.quality.get("statistics", {})
+            if observations.get("measured_holdout_available"):
+                st.subheader("Sample-specific publisher holdout diagnostics")
+                st.caption(
+                    "Only shown because both the original and calibrated source SHA "
+                    "identifiers match this exact release. Confidentialised source "
+                    "comparison errors are NOT individual-vehicle truth."
+                )
+                st.dataframe(pd.DataFrame(observations["published_projection_comparison"]),
+                             hide_index=True,use_container_width=True)
+            else:
+                st.caption(observations.get(
+                    "why","No independently verified sample-specific holdout diagnostics available."
+                ))
             for value in store.quality["limitations"]:
                 st.caption("• "+value)
