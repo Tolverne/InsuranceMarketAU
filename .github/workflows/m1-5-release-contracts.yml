@@ -1,0 +1,35 @@
+name: M1.5 population release contracts and immutable data access
+
+on:
+  pull_request:
+    paths:
+      - "src/insurance_market_au/population/**"
+      - "scripts/m15_release.py"
+      - "apps/m15_release_panel.py"
+      - "apps/m13b_explorer.py"
+      - "contracts/schemas/population-selection.schema.json"
+      - "contracts/feature-views/market_vehicle_base_v1.json"
+      - "tests/test_m15_population.py"
+      - ".github/workflows/m1-5-release-contracts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  immutable-synthetic-release-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install model, Arrow data and contract tests
+        run: python -m pip install -e ".[data,model,dev]"
+      - name: Compile the registry, consumer ports and Streamlit integration
+        run: python -m py_compile src/insurance_market_au/population/releases.py src/insurance_market_au/population/provider.py scripts/m15_release.py apps/m15_release_panel.py apps/m13b_explorer.py
+      - name: Exercise immutable registry, SHA audits, consumer feature views and historical model regressions
+        run: python -m pytest -q tests/test_m15_population.py tests/test_m14b_calibration.py tests/test_m14_diagnostics.py tests/test_m13b_conditional.py tests/test_m13_calibration.py
+      - name: Check repository JSON schemas and example contracts
+        run: python scripts/validate_repository.py
