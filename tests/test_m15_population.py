@@ -219,3 +219,19 @@ def test_holdout_quality_must_match_exact_candidate_and_baseline_sample_hash(tmp
     assert new["quality"]["statistics"]["measured_holdout_available"] is False
     assert new["quality"]["statistics"]["published_projection_comparison"] == []
     assert verify_population(tmp_path,baseline["release_id"])["verified"]
+
+
+def test_pinned_real_release_evidence_is_research_only():
+    from insurance_market_au.data_foundation.m1 import ROOT
+    evidence=json.loads((ROOT/"catalog/validation/m15-verified-real-pilot.json").read_text(encoding="utf-8"))
+    assert evidence["milestone"]=="M1.5"
+    assert evidence["test_input"]["national_expected_vehicles"]==22771150
+    assert evidence["test_input"]["original_fourway_supported_cells"]==64008
+    assert evidence["test_input"]["synthetic_sample_size"]==85000
+    assert evidence["observed_acceptance"]["both_releases_created_separately"] is True
+    assert evidence["observed_acceptance"]["fourway_cell_mass_verified"] is True
+    assert evidence["non_claims"]["pricing_use_approved"] is False
+    assert evidence["non_claims"]["high_dimensional_model_accuracy_verified"] is False
+    ids={x["release_id"] for x in evidence["frozen_releases"]}
+    assert len(ids)==2
+    assert all(releases.RELEASE_RE.fullmatch(rid) for rid in ids)

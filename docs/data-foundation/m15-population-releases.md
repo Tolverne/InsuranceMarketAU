@@ -178,3 +178,10 @@ This port uses batch scanning and weighted group-by processing rather than mater
 M2 introduces `enrichment_release_id`, feature-model versions, insurer/driver/ownership attributes and explicit conditional uncertainty. M3 can use pinned population assets for segment research. M4–M7 must record population, enrichment, participant, pricing and behavioural model versions plus the random stream for any scenario replay.
 
 When the underlying national synthesis is improved (larger support, more accurate location relationships, new official release), create another M1 population release and compare scenario outputs **with all other assumptions held constant**, rather than editing an earlier release.
+
+## First successful official-source acceptance run
+
+The [successful M1.5 authentic BITRE audit](https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44966800111) reconstructed the January 2026 weighted model, froze **85,000-row** M1.3b and M1.4b research samples independently, verified all **64,008** original four-way mass cells for each, exercised the hash-checked read-only feature port and confirmed idempotent publication. The registry recorded approximately **22,771,150 expected vehicles** for both versions.
+
+The two example content-addressed release IDs and their exact CI commit are pinned in `catalog/validation/m15-verified-real-pilot.json`. Your local release IDs can differ because you generated a larger sample and may have attached newer evidence. The example IDs are **not downloadable datasets**, and no real BITRE source or synthetic Parquet files were uploaded as GitHub artifacts. Success is limited to release integrity and reproducible accounting—not rare-model/postcode population accuracy or insurance pricing approval.
+
