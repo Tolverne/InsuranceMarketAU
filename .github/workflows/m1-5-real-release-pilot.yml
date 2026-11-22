@@ -1,10 +1,8 @@
 name: M1.5 authentic BITRE release and frozen population consumer audit
 
-# Intentionally heavyweight: one initial PR audit, then workflow_dispatch.
+# Intentionally heavyweight official-source snapshot audit. Run on demand only;
+# the first authentic publisher-data PR audit has already passed.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/m1-5-real-release-pilot.yml"
   workflow_dispatch:
 
 permissions:
