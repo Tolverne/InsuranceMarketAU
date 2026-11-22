@@ -235,8 +235,66 @@ def _inputs(root: Path, kind: str):
     }
 
 
+def _matching_holdout(root: Path, context: dict) -> dict:
+    """Use published holdout statistics only when BOTH sample SHA IDs match.
+
+    An old 85k-row pilot cannot be attributed to a new 220k-row or different
+    seed release. Holdout results are not used by the original fitting.
+    """
+    path = root / "data/reports/m14b/heldout-comparison.json"
+    if not path.is_file():
+        return {
+            "measured_holdout_available":False,
+            "published_projection_comparison":[],
+            "why":"No provenance-matched paired withheld source evaluation has been run for this frozen sample.",
+        }
+    report=json.loads(path.read_text(encoding="utf-8"))
+    if (report.get("pipeline") != CALIBRATION_VERSION
+        or report.get("baseline_sample_sha256") != context["baseline_sha256"]
+        or report.get("holdout_not_used_for_hyperparameter_selection") is not True
+        or set(report.get("independently_reserved_holdouts",[])) != set(HOLDOUT_SPECS)):
+        return {
+            "measured_holdout_available":False,
+            "published_projection_comparison":[],
+            "why":"A withheld publication report exists but does not match this exact sample or source firewall.",
+        }
+    if context["kind"]=="candidate":
+        if report.get("candidate_sample_sha256")!=context["source_sha256"]:
+            return {
+                "measured_holdout_available":False,
+                "published_projection_comparison":[],
+                "why":"A paired holdout report exists for a DIFFERENT calibrated candidate sample.",
+            }
+        field="candidate_published_cell_WAPE"
+    else:
+        field="baseline_published_cell_WAPE"
+    rows=[]
+    for e in report["comparison"]:
+        if e["projection_id"] not in HOLDOUT_SPECS or e.get("published_cell_threshold")!=100:
+            raise ValueError("Paired holdout report has unexpected source ID or disclosure threshold")
+        rows.append({
+            "published_projection_id":e["projection_id"],
+            "published_cell_WAPE":e[field],
+            "published_cell_support_fraction":e["fraction_comparison_cells_with_sample_support"],
+            "originally_published_cell_threshold":e["published_cell_threshold"],
+            "comparison_cells":e["published_cells_compared"],
+            "source_sha256":e["sha256"],
+            "not_actual_vehicle_truth":True,
+        })
+    return {
+        "measured_holdout_available":True,
+        "published_projection_comparison":rows,
+        "why":(
+            "Paired fixed-row synthetic weights compared against independently "
+            "published, confidentiality-adjusted B26-14/16/17 high-count cells. "
+            "WAPE is not an individual-vehicle error or confidence interval."
+        ),
+    }
+
+
 def _quality(root: Path, context: dict, metrics: dict) -> dict:
     kind = context["kind"]
+    evidence=_matching_holdout(root,context)
     return {
         "schema_version": "m15-quality-v1",
         "model_kind": kind,
@@ -245,15 +303,7 @@ def _quality(root: Path, context: dict, metrics: dict) -> dict:
         "input_provenance": context,
         "fleet_controls":metrics,
         "source_ids":list(SOURCE_IDS),
-        "statistics": {
-            "measured_holdout_error_for_this_release": None,
-            "measured_holdout_available": False,
-            "why": (
-                "This frozen release has not independently demonstrated model accuracy "
-                "for individual make/model/postcode vehicle populations. Earlier "
-                "85k-row experiment errors must not be reused for a different seed/size."
-            ),
-        },
+        "statistics": evidence,
         "quality_gates":{
             "original_fourway_expected_masses_verified":True,
             "schema_and_positive_weights_verified":True,
