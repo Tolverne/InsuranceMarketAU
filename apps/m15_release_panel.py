@@ -74,9 +74,12 @@ else:
              "motive_power","make","registered_postcode","garaging_postcode"],
             key="m15_released_dimension",
         )
+        registered_states = store.aggregate(group_by=("registered_state",),max_groups=100)
+        states = sorted(x["dimensions"]["registered_state"]
+                        for x in registered_states["returned_groups"])
         state=st.selectbox(
             "State of registration (optional)",
-            ["All states","NSW","Vic","QLD","SA","WA","Tas","NT","ACT"],
+            ["All states",*states],
             key="m15_released_state",
         )
         selected_filters=None if state=="All states" else {"registered_state":state}

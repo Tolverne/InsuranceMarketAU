@@ -89,7 +89,7 @@ jobs:
               assert aggregate['total_synthetic_rows']==85000
               assert abs(aggregate['total_estimated_registered_vehicles']-22771150)<.1
               assert len(aggregate['returned_groups'])==8
-              assert sum(b.num_rows for b in store.iter_feature_view(filters={'registered_state':'QLD'}))>0
+              assert sum(b.num_rows for b in store.iter_feature_view(filters={'registered_state':'Qld'}))>0
               assert publish_population(ROOT,kind=report['quality']['model_kind'])['created'] is False
               summaries[report['quality']['model_kind']]={'release_id':rid,'data_sha256':pin['population_asset_sha256']}
               print('M15_REAL_RELEASE_VERIFIED',report['quality']['model_kind'],rid,
