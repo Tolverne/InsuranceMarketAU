@@ -9,3 +9,9 @@ from .workbench import MarketFeatureProvider, MarketFeatureSpec
 __all__ += ["ModelIdentity", "VehicleValueModel", "VehicleUsageModel",
             "UniformValuePlaceholder", "UniformUsagePlaceholder",
             "MarketFeatureProvider", "MarketFeatureSpec"]
+
+from .actors import (ActorFeatures, MarketActorModel, UnknownActorModel, ScenarioActorModel)
+from .market_view import ExtendedMarketProvider, ExtendedMarketSpec
+
+__all__ += ["ActorFeatures", "MarketActorModel", "UnknownActorModel",
+            "ScenarioActorModel", "ExtendedMarketProvider", "ExtendedMarketSpec"]
