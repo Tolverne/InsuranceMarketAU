@@ -32,3 +32,7 @@ Prior prototypes (e.g. other pricing labs) are candidates for reuse after interf
 ## M2.0 research enrichment foundation
 
 M2.0 establishes a streaming, deterministic **hypothetical insurance-feature** port over the exact M1.5 population release. It includes a typed Arrow feature contract, reproducible assumption digest, population dependency pin, conservative unknown-coverage default and fixture tests. No empirical insurance calibration, household/driver linkage or persisted enrichment release is claimed. See [M2.0 implementation guide](m20-enrichment-foundation.md). M2.1 should tackle source evidence and explicitly conditioned usage/value distributions before adding probabilistic household, driver or insured-market participation models.
+
+## M2.1 model-replacement port and M3 hand-off
+
+M2.1 deliberately prioritises a **replaceable market model architecture** over valuation calibration. `MarketFeatureProvider` exposes the existing typed M2.0 view while delegating vehicle value and usage to independently versioned model adapters. The prototype weighted `summarize()` endpoint gives M3 an initial registered-fleet segment denominator; it must not be interpreted as insured market or policy exposures. Future input evidence can replace the adapters without changing M3–M7 consumers. See [M2.1 architecture and implementation](m21-pluggable-market-features.md).
