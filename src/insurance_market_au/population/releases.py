@@ -79,7 +79,9 @@ def _destination(root: Path, release_id: str) -> Path:
 
 def _schema_contract(root: Path):
     from jsonschema import Draft202012Validator, FormatChecker
-    f = root / "contracts/schemas/population-release.schema.json"
+    # Contract is repository code, not part of the isolated data/root
+    # that contains staged/modelled source files (e.g. a pytest fixture).
+    f = ROOT / "contracts/schemas/population-release.schema.json"
     if not f.is_file():
         raise FileNotFoundError(f"Population metadata schema unavailable: {f}")
     document = json.loads(f.read_text(encoding="utf-8"))
