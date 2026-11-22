@@ -21,3 +21,10 @@
 4. First reproducible national population **prototype** with diagnostics; only then select scaling/storage deployment.
 
 Prior prototypes (e.g. other pricing labs) are candidates for reuse after interface and licence review, not prescribed dependencies.
+
+## Research-population hand-off after M1.5
+
+- `M1.3b` remains the default **research** synthesis and `M1.4b` an explicitly unapproved weight-calibrated comparison. Their high-dimensional geographic errors remain an active research question; M1.5 does not certify them.
+- `M1.5` publishes content-addressed, locally frozen weighted Parquet release assets with a four-way accounting snapshot, model/source fingerprints, quality report, synthetic sample weight conventions and a verified consumer feature port.
+- `M2` starts from `PopulationStore(exact_release_id).iter_feature_view()` and introduces separate, versioned ownership, value, usage, driver and coverage features. Its derived version must include the complete population dependency pin.
+- `M3–M7` similarly pin each population and enrichment release plus the required pricing/choice/financial model versions and random stream for reproducibility. Population-model research can progress in parallel without rewriting earlier scenario inputs.

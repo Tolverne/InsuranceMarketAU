@@ -19,6 +19,7 @@ import argparse
 import json
 import sys
 
+from insurance_market_au.data_foundation.m1 import ROOT
 from insurance_market_au.population import (
     PopulationStore, list_populations, publish_population, verify_population,
 )
@@ -72,7 +73,7 @@ def main() -> int:
         elif args.list:
             print(json.dumps(list_populations(),indent=2,allow_nan=False))
         elif args.verify:
-            result=verify_population(__import__("insurance_market_au.data_foundation.m1",fromlist=["ROOT"]).ROOT,args.verify)
+            result=verify_population(ROOT,args.verify)
             print(json.dumps({
                 "release_id":result["release_id"],
                 "verified":result["verified"],

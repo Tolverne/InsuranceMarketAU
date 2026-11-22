@@ -4,7 +4,7 @@
 
 A consulting-first, evidence-led platform for constructing a versioned Australian vehicle and insurance market, modelling any number of insurers/brands/products with interchangeable models, and running reproducible probabilistic market and financial scenarios.
 
-> **Status:** M0 design baseline (proposed; review before implementation). No production dataset or validated market forecast is implied.
+> **Status:** M0 architecture and M1.0–M1.5 synthetic-population research workflows are implemented. Frozen **research-only** weighted population releases and local Streamlit exploration are available. No commercial population validation, policyholder data, production dataset or validated market forecast is implied.
 
 ## Principles
 
@@ -60,3 +60,18 @@ python scripts/download_vehicle_sources.py --groups bitre,vic,nsw,sa,act --downl
 ```
 
 Raw data goes into ignored `data/raw/`, and acquisition manifests into `data/reports/`. The [GitHub Actions workflow](.github/workflows/acquire-vehicle-data.yml) supports remote source discovery and download; raw artifacts are disabled unless expressly opted in after rights review.
+
+## M1.5 — Publish a frozen research population
+
+After generating the M1.3b sample (and optionally M1.4b candidate), install the release-management dependencies and freeze a named, content-addressed version:
+
+```powershell
+py -3 -m pip install -e ".[data,model,explore,release,dev]"
+py -3 scripts/m15_release.py --publish baseline
+py -3 scripts/m15_release.py --list
+py -3 -m streamlit run apps/m13_explorer.py
+```
+
+The Streamlit **Population releases** tab provides a read-only selector, SHA verification, weighted exploratory summaries and an exportable population dependency pin. M2 enrichment and all future simulations must consume an **exact release ID**, not a mutable current-file path. No published research release is automatically approved for pricing, and the independently documented rare make/model/postcode uncertainty remains material.
+
+See [M1.5 technical guide](docs/data-foundation/m15-population-releases.md), the [versioned feature-view contract](contracts/feature-views/market_vehicle_base_v1.json) and [scenario population pin schema](contracts/schemas/population-selection.schema.json).
