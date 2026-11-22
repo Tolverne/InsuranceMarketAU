@@ -1,0 +1,49 @@
+{
+  "version": "m15-evidence-v1",
+  "milestone": "M1.5",
+  "source_run_url": "https://github.com/Tolverne/InsuranceMarketAU/actions/runs/44966800111",
+  "source_commit_sha": "521b3127c74246fd0039b1dd261213e4475eec73",
+  "reference_date": "2026-01-31",
+  "test_input": {
+    "source": "SHA-pinned official BITRE January 2026 published aggregates",
+    "source_family": "M1.3a fourway + M1.3b 8 conditional training projections",
+    "synthetic_sample_size": 85000,
+    "random_seed": 42,
+    "model_variants": [
+      "m13b-conditional-v2",
+      "m14b-soft-conditional-v1"
+    ],
+    "national_expected_vehicles": 22771150,
+    "original_fourway_supported_cells": 64008
+  },
+  "frozen_releases": [
+    {
+      "model_kind": "baseline",
+      "release_id": "pop-20260131-140468f93e4b9e5f8410e868",
+      "frozen_expected_registration_weight": 22771149.999999203
+    },
+    {
+      "model_kind": "candidate",
+      "release_id": "pop-20260131-578f066350adcf3e96e1f720",
+      "frozen_expected_registration_weight": 22771150.00000023
+    }
+  ],
+  "observed_acceptance": {
+    "source_staging_and_base_controls_verified": true,
+    "both_releases_created_separately": true,
+    "idempotent_republication_verified": true,
+    "fourway_cell_mass_verified": true,
+    "dataset_and_quality_sha_verified": true,
+    "Arrow_feature_provider_streamed": true,
+    "population_dependent_scenarios_bound_by_exact_id_and_sha": true,
+    "raw_source_or_synthetic_Parquet_uploaded_as_GitHub_artifact": false,
+    "research_and_commercial_approval_status_separated": true
+  },
+  "non_claims": {
+    "physical_vehicle_record_truth_verified": false,
+    "high_dimensional_model_accuracy_verified": false,
+    "pricing_use_approved": false,
+    "commercial_population_release_approved": false
+  },
+  "interpretation": "Research release IDs are content-dependent; actual user IDs change with sample size, seed, model source version and content-matched quality evidence. These IDs are examples from this exact CI run, not aliases for the user's local files."
+}

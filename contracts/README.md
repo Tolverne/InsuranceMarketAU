@@ -11,3 +11,9 @@ This directory carries proposed JSON Schema 2020-12 manifests and valid **illust
 **Scope:** metadata/control contracts only. Physical Arrow/Parquet feature/event schemas will be designed using verified source samples and recorded here in future milestones. The validator checks schema validity and examples; it does not prove statistical calibration.
 
 Run `python -m pip install -e ".[dev]"` then `python scripts/validate_repository.py` and `pytest`.
+
+## M1.5 executable population consumer boundary
+
+- `schemas/population-selection.schema.json`: reproducible content-addressed population input pin for enrichment and scenarios.
+- `feature-views/market_vehicle_base_v1.json`: Arrow batch field/weight semantics for the immutable M1.5 `PopulationStore` feature provider.
+- `schemas/population-release.schema.json`: existing base schema now used for locally frozen, content-verified **research** population manifests. Published here means frozen, **not** commercial accuracy approval.

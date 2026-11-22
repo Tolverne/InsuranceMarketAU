@@ -28,3 +28,5 @@
 - [M1.4a Independent validation and sampling sensitivity](data-foundation/m14-validation.md)
 
 - [M1.4b Soft conditional weight calibration and independent heldout evaluation](data-foundation/m14b-calibration.md)
+
+- [M1.5 Frozen research population release registry and feature provider](data-foundation/m15-population-releases.md)

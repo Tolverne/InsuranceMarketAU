@@ -203,9 +203,10 @@ def chart(frame: pd.DataFrame, dimension: str, *, n: int = 20) -> None:
     st.bar_chart(series, y_label="Weighted synthetic expected vehicles")
 
 
-overview, makes_tab, geography, sample_rows_tab, diagnostic_tab, calibration_tab, validation = st.tabs([
+overview, makes_tab, geography, sample_rows_tab, diagnostic_tab, calibration_tab, registry_tab, validation = st.tabs([
     "Overview", "Make and model", "Registered versus garaging geography",
-    "Synthetic sample rows", "Model diagnostics", "Calibration comparison", "Validation and provenance"
+    "Synthetic sample rows", "Model diagnostics", "Calibration comparison",
+    "Population releases", "Validation and provenance"
 ])
 with overview:
     x,y = st.columns(2)
@@ -365,6 +366,12 @@ with calibration_tab:
                 "py -3 scripts/m14b_calibrate.py --validate-only"
             )
         st.caption("No calibrated weights are promoted automatically into pricing, demand or a released population.")
+
+with registry_tab:
+    # Separate from working model views. A selected frozen release is
+    # SHA-verified and read-only; no fitting or publication in Streamlit.
+    import runpy
+    runpy.run_path(str(ROOT / "apps/m15_release_panel.py"), run_name="__main__")
 
 with validation:
     st.subheader("Model provenance and calibration")

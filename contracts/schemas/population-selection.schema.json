@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pinned immutable research population dependency for downstream model/scenario manifests",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "population_release_id",
+    "population_asset_sha256",
+    "population_release_digest",
+    "dataset_schema_version",
+    "reference_date",
+    "representation",
+    "vehicle_weight_field",
+    "expected_registered_vehicle_mass",
+    "sample_row_count",
+    "quality_status",
+    "commercial_use_approved"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "population-selection-v1"
+    },
+    "population_release_id": {
+      "type": "string",
+      "pattern": "^pop-[0-9]{8}-[0-9a-f]{24}$"
+    },
+    "population_asset_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "population_release_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dataset_schema_version": {
+      "const": "fleet-state-weighted-v1"
+    },
+    "reference_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "representation": {
+      "const": "weighted_sample"
+    },
+    "vehicle_weight_field": {
+      "const": "expected_vehicle_weight"
+    },
+    "expected_registered_vehicle_mass": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "sample_row_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "quality_status": {
+      "const": "research_only_unapproved_high_dimensional"
+    },
+    "commercial_use_approved": {
+      "const": false
+    }
+  }
+}

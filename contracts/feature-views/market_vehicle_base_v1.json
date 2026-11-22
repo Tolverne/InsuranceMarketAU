@@ -1,0 +1,96 @@
+{
+  "contract_id": "market_vehicle_base_v1",
+  "publisher": "InsuranceMarketAU M1.5 population reader",
+  "data_context": "reproducible research-only synthetic population feature view",
+  "row_grain": "one algorithmically sampled weighted vehicle representative per immutable population release",
+  "physical_representation": "Arrow RecordBatch stream, not registration records or individual policies",
+  "population_pin_required": true,
+  "source_dataset_contract": "fleet-state-weighted-v1",
+  "fields": [
+    {
+      "name": "synthetic_vehicle_id",
+      "type": "int64",
+      "meaning": "release-local generated ordinal; no physical vehicle ID; not stable across independent samples"
+    },
+    {
+      "name": "registered_state",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "vehicle_type",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "manufacture_year",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "motive_power",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "make",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "model",
+      "type": "utf8",
+      "meaning": "category from synthetic inference and publisher coding"
+    },
+    {
+      "name": "registered_postcode",
+      "type": "utf8",
+      "meaning": "registration-location category (not geocoded address)"
+    },
+    {
+      "name": "garaging_postcode",
+      "type": "utf8",
+      "meaning": "separately inferred garaging-location category, not joint observation"
+    },
+    {
+      "name": "sampling_weight",
+      "type": "float64",
+      "unit": "expected_registered_vehicles",
+      "meaning": "positive expected fleet mass represented by the synthetic row; not insurance exposure"
+    },
+    {
+      "name": "uncertainty_kind",
+      "type": "utf8",
+      "meaning": "source conditional inference, not observed vehicle join"
+    },
+    {
+      "name": "is_synthetic",
+      "type": "bool",
+      "required_value": true
+    },
+    {
+      "name": "population_release_id",
+      "type": "utf8",
+      "meaning": "immutable content-addressed dataset version"
+    },
+    {
+      "name": "reference_date",
+      "type": "utf8",
+      "meaning": "stock reference date in ISO YYYY-MM-DD"
+    }
+  ],
+  "not_provided": [
+    "owner_entity",
+    "driver_assignment",
+    "vehicle_value_aud",
+    "annual_km",
+    "insurance_coverage",
+    "policy_count",
+    "quote_premium",
+    "risk_exposure"
+  ],
+  "release_gate": {
+    "individual_vehicle_truth": false,
+    "commercial_pricing_approved": false
+  }
+}
