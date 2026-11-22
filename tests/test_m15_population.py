@@ -176,3 +176,46 @@ def test_candidate_fails_closed_if_source_version_or_hash_changed(tmp_path,monke
         stream.write(b"altered")
     with pytest.raises(ValueError,match="source isolation|provenance"):
         publish_population(tmp_path,kind="candidate")
+
+
+def test_holdout_quality_must_match_exact_candidate_and_baseline_sample_hash(tmp_path,monkeypatch):
+    from insurance_market_au.data_foundation.m1 import sha256_file
+    _fixtures(tmp_path,monkeypatch,n=80)
+    candidate=m14b.calibrate(tmp_path,rounds=1)
+    baseline_sha=sha256_file(tmp_path/m13b.PATH_ROWS)
+    candidate_sha=sha256_file(tmp_path/m14b.PATH_CALIBRATED)
+    report={
+        "pipeline":"m14b-soft-conditional-v1",
+        "baseline_sample_sha256":baseline_sha,
+        "candidate_sample_sha256":candidate_sha,
+        "holdout_not_used_for_hyperparameter_selection":True,
+        "independently_reserved_holdouts":["B26-14","B26-16","B26-17"],
+        "comparison":[{
+            "projection_id":pid,
+            "published_cell_threshold":100,
+            "published_cells_compared":1000,
+            "fraction_comparison_cells_with_sample_support":0.4,
+            "baseline_published_cell_WAPE":0.65,
+            "candidate_published_cell_WAPE":0.55,
+            "sha256":char*64,
+        } for pid,char in [("B26-14","a"),("B26-16","b"),("B26-17","c")]],
+    }
+    path=tmp_path/"data/reports/m14b/heldout-comparison.json"
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(json.dumps(report),encoding="utf-8")
+    baseline=publish_population(tmp_path,kind="baseline")
+    calibrated=publish_population(tmp_path,kind="candidate")
+    assert baseline["quality"]["statistics"]["measured_holdout_available"] is True
+    assert calibrated["quality"]["statistics"]["measured_holdout_available"] is True
+    assert all(row["published_cell_WAPE"]==pytest.approx(0.65)
+               for row in baseline["quality"]["statistics"]["published_projection_comparison"])
+    assert all(row["published_cell_WAPE"]==pytest.approx(0.55)
+               for row in calibrated["quality"]["statistics"]["published_projection_comparison"])
+    # Rebuilding source with a different seed/size cannot inherit old
+    # published-cell accuracy from an unrelated experiment.
+    m13b.build_weighted_sample(tmp_path,rows=90,seed=53)
+    new=publish_population(tmp_path,kind="baseline")
+    assert new["release_id"]!=baseline["release_id"]
+    assert new["quality"]["statistics"]["measured_holdout_available"] is False
+    assert new["quality"]["statistics"]["published_projection_comparison"] == []
+    assert verify_population(tmp_path,baseline["release_id"])["verified"]
