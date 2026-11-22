@@ -4,7 +4,7 @@
 
 A consulting-first, evidence-led platform for constructing a versioned Australian vehicle and insurance market, modelling any number of insurers/brands/products with interchangeable models, and running reproducible probabilistic market and financial scenarios.
 
-> **Status:** M0 architecture and M1.0–M1.5 synthetic-population research workflows are implemented. Frozen **research-only** weighted population releases and local Streamlit exploration are available. No commercial population validation, policyholder data, production dataset or validated market forecast is implied.
+> **Status:** M0 architecture, M1.0–M1.5 synthetic-population research workflows and the M2.0 hypothetical enrichment feature port are implemented. Frozen **research-only** weighted population releases and local Streamlit exploration are available. No commercial population validation, policyholder data, production dataset or validated market forecast is implied.
 
 ## Principles
 
@@ -75,3 +75,7 @@ py -3 -m streamlit run apps/m13_explorer.py
 The Streamlit **Population releases** tab provides a read-only selector, SHA verification, weighted exploratory summaries and an exportable population dependency pin. M2 enrichment and all future simulations must consume an **exact release ID**, not a mutable current-file path. No published research release is automatically approved for pricing, and the independently documented rare make/model/postcode uncertainty remains material.
 
 See [M1.5 technical guide](docs/data-foundation/m15-population-releases.md), the [versioned feature-view contract](contracts/feature-views/market_vehicle_base_v1.json) and [scenario population pin schema](contracts/schemas/population-selection.schema.json).
+
+## M2.0 — Research-only insurance feature port
+
+Read [M2.0 contract, limitations and implementation guide](docs/delivery/m20-enrichment-foundation.md). `EnrichmentProvider(PopulationStore(release_id), EnrichmentSpec())` returns deterministic, streaming Arrow features without changing M1 releases. Mileage and value are unvalidated scenario placeholders; coverage defaults to unknown. The model pins its exact source population and all parameters.
