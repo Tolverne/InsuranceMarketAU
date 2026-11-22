@@ -56,7 +56,7 @@ def test_full_scenario_and_adapter_swappability():
 
 
 def test_streaming_batch_independence():
-    import pyarrow as pa
+    pa = pytest.importorskip("pyarrow")
     provider = ExtendedMarketProvider(_population(), ExtendedMarketSpec(
         actors=ScenarioActorModel(insured_probability=.5)))
     full = next(provider.iter_feature_view(batch_size=100))
