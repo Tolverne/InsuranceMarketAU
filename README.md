@@ -79,3 +79,11 @@ See [M1.5 technical guide](docs/data-foundation/m15-population-releases.md), the
 ## M2.0 — Research-only insurance feature port
 
 Read [M2.0 contract, limitations and implementation guide](docs/delivery/m20-enrichment-foundation.md). `EnrichmentProvider(PopulationStore(release_id), EnrichmentSpec())` returns deterministic, streaming Arrow features without changing M1 releases. Mileage and value are unvalidated scenario placeholders; coverage defaults to unknown. The model pins its exact source population and all parameters.
+
+## M2.1 — Replaceable market-feature models
+
+[Architecture and sample usage](docs/delivery/m21-pluggable-market-features.md): `MarketFeatureProvider` streams M1.5-pinned Arrow features through independently versioned valuation and usage adapters. It includes a weighted segment-summary preview for future M3 development. Built-in models are illustrative placeholders, not actual Australian market valuations or insured-market estimates.
+
+```powershell
+py -3 -m pytest tests/test_m21_market_features.py -q
+```
