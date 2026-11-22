@@ -308,7 +308,7 @@ def _manifest(context: dict, metrics: dict, payload: dict,
         ),
         "geography_version":"BITRE-2026-registration-and-garaging-postcode-roles",
         "synthesis":{
-            "method": context["model_kind"]+"_weighted_synthetic",
+            "method": context["kind"]+"_weighted_synthetic",
             "model_version":context["model_version"],
             "population_draw_id":f"sample-{context['seed']}-n{context['sample_size']}",
             "random_algorithm":"PCG64",
