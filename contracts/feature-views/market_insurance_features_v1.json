@@ -1,0 +1,56 @@
+{
+  "contract_id": "market_insurance_features_v1",
+  "source_feature_view": "market_vehicle_base_v1",
+  "row_grain": "one weighted synthetic vehicle representative in exact pinned M1.5 release",
+  "fields_added": [
+    {
+      "name": "vehicle_age_years",
+      "type": "int16 nullable",
+      "status": "derived from manufacture_year if four-digit exact year; otherwise null"
+    },
+    {
+      "name": "annual_km_scenario",
+      "type": "int32",
+      "unit": "km/year",
+      "status": "hypothetical uniform range, not observed"
+    },
+    {
+      "name": "vehicle_value_scenario_aud",
+      "type": "float64",
+      "unit": "AUD",
+      "status": "hypothetical uniform range, not market valuation"
+    },
+    {
+      "name": "cover_scenario",
+      "type": "utf8",
+      "status": "unknown unless explicitly scenario-overridden"
+    },
+    {
+      "name": "enrichment_model_digest",
+      "type": "utf8",
+      "status": "SHA256 of model version and assumptions"
+    },
+    {
+      "name": "enrichment_uncertainty_kind",
+      "type": "utf8",
+      "status": "hypothetical_unvalidated_scenario"
+    }
+  ],
+  "unchanged_fields": [
+    "synthetic_vehicle_id",
+    "sampling_weight",
+    "population_release_id"
+  ],
+  "not_provided": [
+    "household_id",
+    "owner_id",
+    "driver_id",
+    "driver_age",
+    "licence_history",
+    "actual_insured_value",
+    "actual_annual_km",
+    "insurance_policy",
+    "actual_coverage"
+  ],
+  "commercial_use_approved": false
+}
