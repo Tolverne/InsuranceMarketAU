@@ -23,9 +23,9 @@ DEFAULT_COLUMNS = (
     "synthetic_row_id", "registered_state", "vehicle_type",
     "manufacture_year", "motive_power", "make", "model",
     "registered_postcode", "garaging_postcode", "expected_vehicle_weight",
-    "uncertainty_kind",
+    "uncertainty_kind", "is_synthetic",
 )
-EXPORTED_COLUMNS = (*DEFAULT_COLUMNS,"is_synthetic")
+EXPORTED_COLUMNS = DEFAULT_COLUMNS
 
 
 def _arrow_filter(filters: Mapping[str, str | Iterable[str]] | None):
@@ -96,9 +96,8 @@ class PopulationStore:
         import pyarrow.dataset as ds
         if batch_size<=0 or batch_size>100_000:
             raise ValueError("Population batch size must be 1..100000")
-        available=set(self.manifest["outputs"][0].get("schema_fields",EXPORTED_COLUMNS))
-        # The raw table may carry all M1.3b data columns, but consumers can
-        # only select the advertised stable typed population contract.
+        # Consumers can select only the advertised stable typed fields,
+        # not arbitrary Parquet or future proprietary enrichment columns.
         chosen=tuple(columns)
         if len(chosen)!=len(set(chosen)) or not chosen or not set(chosen)<=set(EXPORTED_COLUMNS):
             raise ValueError("Feature view includes unknown/duplicate/empty population field")
@@ -195,7 +194,11 @@ class PopulationStore:
             "population_release_id":self.release_id,
             "dataset_schema_version":CONTRACT,
             "group_by":list(dimensions),
-            "filters":dict(filters or {}),
+            "filters":{
+                name: ([selection] if isinstance(selection,str)
+                       else sorted(set(selection)))
+                for name,selection in (filters or {}).items()
+            },
             "total_estimated_registered_vehicles":total,
             "total_synthetic_rows":sum(counts.values()),
             "total_effective_sample_size":total**2/square_total if square_total else 0.0,
