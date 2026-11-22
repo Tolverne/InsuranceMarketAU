@@ -36,3 +36,7 @@ M2.0 establishes a streaming, deterministic **hypothetical insurance-feature** p
 ## M2.1 model-replacement port and M3 hand-off
 
 M2.1 deliberately prioritises a **replaceable market model architecture** over valuation calibration. `MarketFeatureProvider` exposes the existing typed M2.0 view while delegating vehicle value and usage to independently versioned model adapters. The prototype weighted `summarize()` endpoint gives M3 an initial registered-fleet segment denominator; it must not be interpreted as insured market or policy exposures. Future input evidence can replace the adapters without changing M3–M7 consumers. See [M2.1 architecture and implementation](m21-pluggable-market-features.md).
+
+## M2.2 actor/participation adapter boundary
+
+M2.2 adds a separately replaceable categorical owner/driver/purpose/insurance-participation adapter over the M2.1 feature stream. Defaults are **unknown**; opt-in simulator scenarios produce hypothetical, deterministic assignment only. Its segment report conserves weighted registration mass as insured-scenario + not-insured-scenario + unknown, while forbidding conversion of these figures into observed policy exposure. The full M1.5 + M2.1 + M2.2 selection is pinned. The next structural priority is M3's analyst segment filters, denominator policies and assumption-sensitive market snapshots. See [M2.2 guide](m22-market-actor-ports.md).

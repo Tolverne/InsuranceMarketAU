@@ -19,3 +19,15 @@ jobs:
         run: python scripts/validate_repository.py
       - name: Test contract invariants
         run: pytest -q
+
+  m2-feature-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install M2 feature dependencies
+        run: python -m pip install -e ".[dev,release]"
+      - name: Test M2.0-M2.2 pluggable feature contracts with Arrow installed
+        run: python -m pytest -q tests/test_m20_enrichment.py tests/test_m21_market_features.py tests/test_m22_actors.py

@@ -1,0 +1,81 @@
+{
+  "contract_id": "market_insurance_actors_v1",
+  "source_feature_view": "market_insurance_features_v1",
+  "row_grain": "one weighted synthetic registered-vehicle representative",
+  "fields_added": [
+    {
+      "name": "owner_type_scenario",
+      "type": "utf8",
+      "allowed": [
+        "unknown",
+        "private",
+        "business",
+        "fleet",
+        "other"
+      ]
+    },
+    {
+      "name": "driver_relationship_scenario",
+      "type": "utf8",
+      "allowed": [
+        "unknown",
+        "owner",
+        "named_other",
+        "multiple"
+      ]
+    },
+    {
+      "name": "vehicle_purpose_scenario",
+      "type": "utf8",
+      "allowed": [
+        "unknown",
+        "private",
+        "commuting",
+        "business",
+        "recreational"
+      ]
+    },
+    {
+      "name": "insurance_participation_scenario",
+      "type": "utf8",
+      "allowed": [
+        "unknown",
+        "insured",
+        "not_insured"
+      ]
+    },
+    {
+      "name": "coverage_type_scenario",
+      "type": "utf8",
+      "allowed": [
+        "unknown",
+        "comprehensive",
+        "third_party_property",
+        "uninsured"
+      ]
+    },
+    {
+      "name": "actor_model_digest",
+      "type": "utf8",
+      "meaning": "SHA256 of full M2.2 model selection including M2.1 pin"
+    }
+  ],
+  "unchanged_fields": [
+    "synthetic_vehicle_id",
+    "population_release_id",
+    "sampling_weight"
+  ],
+  "not_provided": [
+    "household_id",
+    "person_id",
+    "driver_age",
+    "policy_id",
+    "quote_id",
+    "claim_id",
+    "policy_exposure_years"
+  ],
+  "mass_unit": "expected_registered_vehicles",
+  "insured_mass_unit": "hypothetical scenario registered-vehicle mass, never observed insured-policy counts",
+  "quality_status": "hypothetical_unvalidated",
+  "commercial_use_approved": false
+}

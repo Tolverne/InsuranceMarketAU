@@ -87,3 +87,7 @@ Read [M2.0 contract, limitations and implementation guide](docs/delivery/m20-enr
 ```powershell
 py -3 -m pytest tests/test_m21_market_features.py -q
 ```
+
+## M2.2 — Market actors and insurance participation
+
+The [M2.2 model port](docs/delivery/m22-market-actor-ports.md) adds replaceable owner/driver/purpose/coverage and participation fields to the streaming M2.1 feature view. `ExtendedMarketProvider` preserves registration weights and original population lineage. The default values are unknown; opt-in `ScenarioActorModel` produces **hypothetical scenario** participation counts, not actual policies or insured risk exposure. Run `py -3 -m pytest tests/test_m22_actors.py -q`.
